@@ -1,10 +1,14 @@
 import { StyleSheet, Text, TextInput, View, TouchableOpacity, Image, TouchableWithoutFeedback } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckBox } from '../components/CheckBox';
+
 import { onAuthStateChanged,
 	createUserWithEmailAndPassword,
 	signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase/config";
+import { usePromise } from '../components/PromiseHandle';
+import { StackActions } from '@react-navigation/routers';
+
 
 const LoginScreen = ( props ) => {
 	const [rememberMe, setRememberMe] = useState(false);
@@ -13,37 +17,30 @@ const LoginScreen = ( props ) => {
 
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
+	
+	
 
 	async function handleSubmit() {
-		signInWithEmailAndPassword(auth, username, password)
-		.then((userCredential) => {
-			// Signed in 
-			const user = userCredential.user;
-			// ...
-			alert("Logged in successfully!")
-		  })
-		  .catch((error) => {
-			const errorCode = error.code;
-			const errorMessage = error.message;
-			// ..
-			alert(errorMessage)
-		  });
+		const [user, error] = await usePromise(signInWithEmailAndPassword(auth, username, password))
+		if (user) {
+			alert("Logged in successfully!");
+			props.navigation.dispatch(
+				StackActions.replace("Home", "Login")
+			);
+		} else {
+			console.log(error)
+			alert(error.message);
+		}
 	}
 	
 	async function handleSignUp() {
-		createUserWithEmailAndPassword(auth, username, password)	
-		.then((userCredential) => {
-			// Signed in 
-			const user = userCredential.user;
-			// ...
-			alert("User created successfully!")
-		  })
-		  .catch((error) => {
-			const errorCode = error.code;
-			const errorMessage = error.message;
-			// ..
-			alert(errorMessage)
-		  });
+		const [user, error] = await usePromise(createUserWithEmailAndPassword(auth, username, password))
+		if (user) {
+			alert("Signed up successfully!");
+		} else {
+			console.log(error)
+			alert(error.message);
+		}
 	}
 
 	function handleForgotPassword() {
@@ -73,9 +70,16 @@ const LoginScreen = ( props ) => {
 			{/* login form here */}
 			<View style={styles.loginForm}>
 				<Text style={styles.text}>Username/Email:</Text>
-				<TextInput style={styles.input} placeholder='Username/Email' id="email" keyboardType="email-address" value={username} onChangeText={(value) => setUsername(value)} />
+				<TextInput 	style={styles.input} 
+							placeholder='Username/Email' id="email" 
+							keyboardType="email-address" textContentType='username'
+							autoCapitalize='none' autoCorrect={false} autoFocus={true} autoComplete="username"
+							value={username} onChangeText={(value) => setUsername(value)} />
 				<Text style={styles.text}>Password:</Text>
-				<TextInput style={styles.input} placeholder='Password' secureTextEntry={true} id="password" value={password} onChangeText={(value) => setPassword(value)} />
+				<TextInput 	style={styles.input} 
+							placeholder='Password' id="password"
+							secureTextEntry={true} textContentType='password' autoComplete="password"
+							value={password} onChangeText={(value) => setPassword(value)} />
 				
 				<View style={styles.horizontalDrawer}>
 					<CheckBox
