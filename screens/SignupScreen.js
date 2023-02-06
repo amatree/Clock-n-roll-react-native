@@ -4,7 +4,8 @@ import { CheckBox } from '../components/CheckBox';
 
 import { onAuthStateChanged,
 	createUserWithEmailAndPassword,
-	signInWithEmailAndPassword } from "firebase/auth";
+	signInWithEmailAndPassword,
+email } from "firebase/auth";
 import { auth } from "../firebase/config";
 import { usePromise } from '../components/PromiseHandle';
 import { StackActions } from '@react-navigation/routers';
@@ -20,6 +21,7 @@ import Animated, {
 	withRepeat,
 	withSpring,
 } from 'react-native-reanimated';
+import SignInWithProvider from '../components/HandleAuthProvider';
 
 var d_width = Dimensions.get('window').width; //full width
 var d_height = Dimensions.get('window').height; //full height
@@ -70,11 +72,14 @@ const SignupScreen = ( props ) => {
 		alert("Github");
 	}
 	
-	function handleAuthGoogle() {
+	async function handleAuthGoogle() {
+		const result = await SignInWithProvider("google");
+		console.log(result);
 		alert("googleee");
 	}
 
 	function handleGetEmailCode() {
+
 		alert("Getting da code (wip)")
 	}
 

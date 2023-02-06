@@ -31,29 +31,58 @@ const SigninScreen = ( props ) => {
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	
-	const zoomScaleX = useSharedValue(1);
-	const zoomScaleY = useSharedValue(1);
+	const zoomScaleX = useSharedValue(0);
+	const zoomScaleY = useSharedValue(0);
+	const [zoomToggle, setZoomToggle] = useState(false);
+	const [loggingInText, setLoggingInText] = useState("");
 
 	const zoomConfig = {
-		duration: 1000,
+		duration: 3000,
 	};
 	const zoomStyle = useAnimatedStyle(() => {
 		return {
 			transform: [
-				{scaleX: withTiming(zoomScaleX.value, zoomConfig)},
-				{scaleY: withTiming(zoomScaleY.value, zoomConfig)},
+				{scaleX: withSpring(zoomScaleX.value, zoomConfig)},
+				{scaleY: withSpring(zoomScaleY.value, zoomConfig)},
 			]
 		}
 	});
+
+	useEffect(() => {
+		let timers = [];
+		if (zoomToggle) {
+			setLoggingInText("Checking information...");
+
+			let timer = setTimeout(() => {
+				setLoggingInText("Authenticating...");
+
+				let timer2 = setTimeout(() => {
+					handleSubmit();
+				}, (Math.random() + 0.01) * 2500);
+				timers.push(timer2);
+
+			}, (Math.random() + 0.01) * 2500);
+			timers.push(timer);
+		}
+		return () => {
+			if (timers.length > 0) {
+				timers.map((timer) => {
+					clearTimeout(timer);
+				})
+			}
+		}
+	}, [zoomToggle])
 	
 
 	async function handleSubmit() {
 		const [user, error] = await usePromise(signInWithEmailAndPassword(auth, username, password))
 		if (user) {
-			alert("Logged in successfully!");
-			props.navigation.dispatch(
-				props.navigation.replace("Home", {rememberMe: rememberMe, useFaceID: useFaceID}),
-			);
+			setLoggingInText("Logged in successfully!");
+			setTimeout(() => {
+				props.navigation.dispatch(
+					props.navigation.replace("Home", {rememberMe: rememberMe, useFaceID: useFaceID}),
+				);
+			}, Math.random() * 500);
 		} else {
 			console.log(error)
 			alert(error.message);
@@ -68,6 +97,8 @@ const SigninScreen = ( props ) => {
 
 	function handleForgotPassword() {
 		alert("currently implementing :3");
+		setUsername("Test@gmail.com");
+		setPassword("12345678");
 	}
 
 	function handleAuthFaceID() {
@@ -92,15 +123,24 @@ const SigninScreen = ( props ) => {
 		}
 	}
 
-	function testAnimation() {
-		setUsername("Test@gmail.com");
-		setPassword("12345678");
-		zoomScaleX.value = zoomScaleX.value === 1 ? 1.2 : 1;
-		zoomScaleY.value = zoomScaleY.value === 1 ? 100 : 1;
+	function handleLogin() {
+		zoomScaleX.value = zoomScaleX.value === 0 ? 1 : 0;
+		zoomScaleY.value = zoomScaleY.value === 0 ? 1 : 0;
+		setZoomToggle(!zoomToggle)
 	}
 
 	return (
 		<View style={styles.container}>
+			{/* {Overlay here} */}
+			<Animated.View style={[zoomStyle, styles.overlay, {zIndex: 99, display: zoomToggle ? "flex" : "flex"}]}>
+				<View style={{justifyContent: "center", alignItems: "center", height: "100%"}}>
+					<Text style={[styles.boldText, {color: "black", fontSize: 36}]}>Logging you in~</Text>
+					<View style={{alignItems: "center"}}>
+						<Text style={[styles.text, {color: "black", opacity: 0.3, fontSize: 14, position: "absolute"}]}>{loggingInText}</Text>
+					</View>
+				</View>
+			</Animated.View>
+
 			{/* title here */}
 			<View style={styles.titleWrapper}>
 				<Text style={styles.title}>Sign In</Text>
@@ -142,15 +182,9 @@ const SigninScreen = ( props ) => {
 					/>
 				</View>
 
-				<TouchableOpacity onPress={() => {
-					testAnimation();
-				}}><Text>test animation</Text></TouchableOpacity>
-
-				<Animated.View style={[zoomStyle, {zIndex: 99}]}>
-					<TouchableOpacity style={styles.submitBtn} onPress={() => handleSubmit()}>
-						<Text style={[styles.boldText, {color: "white"}]}>Sign in</Text>
-					</TouchableOpacity>
-				</Animated.View>
+				<TouchableOpacity style={styles.submitBtn} onPress={() => handleLogin()}>
+					<Text style={[styles.boldText, {color: "white"}]}>Sign in</Text>
+				</TouchableOpacity>
 
 				<View style={[styles.horizontalDrawer, {paddingRight: 5, paddingTop: 24}]}>
 					<TouchableWithoutFeedback onPress={() => handleForgotPassword()}>
@@ -197,6 +231,14 @@ const SigninScreen = ( props ) => {
 }
 
 const styles = StyleSheet.create({
+	overlay: {
+		position: 'absolute',
+		top: 0,
+		right: 0,
+		bottom: 0,
+		left: 0,
+		backgroundColor: 'white',
+	},
 	container: {
 		flex: 1,
 		justifyContent: "center",

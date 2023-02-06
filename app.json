@@ -18,9 +18,11 @@
       "**/*"
     ],
     "ios": {
+	  "googleServicesFile": "./firebase/GoogleService-Info.plist",
       "supportsTablet": true
     },
     "android": {
+	  "googleServicesFile": "./firebase/google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
