@@ -38,20 +38,20 @@ const SignupScreen = ( props ) => {
 	async function handleSubmit() {
 		const [user, error] = await usePromise(createUserWithEmailAndPassword(auth, username, password))
 		if (user) {
-			alert("Account created successfully!");
+			// alert("Account created successfully!");
 			props.navigation.dispatch(
-				props.navigation.replace("Sign In")
+				props.navigation.replace("Sign In", {successfulSignup: true, uid: user.uid})
 			);
-		} else {
-			console.log(error)
-			alert(error.message);
-		}
+			} else {
+				console.log(error)
+				alert(error.message);
+			}
 	}
 
 	function handleGotoSignin() {
 		props.navigation.goBack();
 	}
-
+	
 	function handleAuthGithub() {
 		alert("Github");
 	}

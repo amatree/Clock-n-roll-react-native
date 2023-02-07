@@ -24,10 +24,12 @@ var d_width = Dimensions.get('window').width; //full width
 var d_height = Dimensions.get('window').height; //full height
 
 const SigninScreen = ( props ) => {
+	// const successfulSignup = props.route.params.successfulSignup;
 	const auth = getAuth();
 	const [rememberMe, setRememberMe] = useState(false);
 	const [useFaceID, setUseFaceID] = useState(false);
 	const [wasSubmitted, setWasSubmitted] = useState(false);
+	const [loggedInThruSignUp, setLoggedInThruSignUp] = useState(null);
 
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -35,7 +37,7 @@ const SigninScreen = ( props ) => {
 	const zoomScaleX = useSharedValue(0);
 	const zoomScaleY = useSharedValue(0);
 	const [zoomToggle, setZoomToggle] = useState(false);
-	const [loggingInText, setLoggingInText] = useState("");
+	const [loggingInText, setLoggingInText] = useState(false);
 
 	const zoomConfig = {
 		duration: 3000,
@@ -48,6 +50,17 @@ const SigninScreen = ( props ) => {
 			]
 		}
 	});
+
+	useEffect(() => {
+		if (!wasSubmitted) {
+			setWasSubmitted(true);
+			if (props.route.params && props.route.params.successfulSignup)
+			{
+				setLoggedInThruSignUp(true);
+				skipCredentialLogin();
+			}
+		}
+	}, [wasSubmitted])
 
 	useEffect(() => {
 		let timers = [];
@@ -76,7 +89,18 @@ const SigninScreen = ( props ) => {
 	
 
 	async function handleSubmit() {
+		if (loggedInThruSignUp)
+		{
+			setLoggingInText("Logged in successfully!");
+			setTimeout(() => {
+				props.navigation.dispatch(
+					props.navigation.replace("Home", {rememberMe: rememberMe, useFaceID: useFaceID}),
+				);
+			}, Math.random() * 500);
+			return;
+		}
 		const [user, error] = await usePromise(signInWithEmailAndPassword(auth, username, password))
+
 		if (user) {
 			setLoggingInText("Logged in successfully!");
 			setTimeout(() => {
@@ -120,10 +144,14 @@ const SigninScreen = ( props ) => {
 			alert("Make sure to fill out all fields!");
 			return;
 		}
+		skipCredentialLogin();
+		Keyboard.dismiss();
+	}
+
+	function skipCredentialLogin() {
 		zoomScaleX.value = zoomScaleX.value === 0 ? 1 : 0;
 		zoomScaleY.value = zoomScaleY.value === 0 ? 1 : 0;
 		setZoomToggle(!zoomToggle)
-		Keyboard.dismiss();
 	}
 
 	return (
