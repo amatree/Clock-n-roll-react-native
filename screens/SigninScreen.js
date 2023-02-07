@@ -1,11 +1,11 @@
-import { StyleSheet, Text, TextInput, View, TouchableOpacity, Image, TouchableWithoutFeedback, Dimensions } from 'react-native';
+import { StyleSheet, Text, TextInput, View, TouchableOpacity, Image, TouchableWithoutFeedback, Dimensions, Keyboard } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { CheckBox } from '../components/CheckBox';
 
 import { onAuthStateChanged,
 	createUserWithEmailAndPassword,
 	signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase/config";
+import { getAuth } from "firebase/auth";
 import { usePromise } from '../components/PromiseHandle';
 import { StackActions } from '@react-navigation/routers';
 
@@ -24,6 +24,7 @@ var d_width = Dimensions.get('window').width; //full width
 var d_height = Dimensions.get('window').height; //full height
 
 const SigninScreen = ( props ) => {
+	const auth = getAuth();
 	const [rememberMe, setRememberMe] = useState(false);
 	const [useFaceID, setUseFaceID] = useState(false);
 	const [wasSubmitted, setWasSubmitted] = useState(false);
@@ -58,10 +59,10 @@ const SigninScreen = ( props ) => {
 
 				let timer2 = setTimeout(() => {
 					handleSubmit();
-				}, (Math.random() + 0.01) * 2500);
+				}, (Math.random() + 0.1) * 1500);
 				timers.push(timer2);
 
-			}, (Math.random() + 0.01) * 2500);
+			}, (Math.random() + 0.01) * 1000);
 			timers.push(timer);
 		}
 		return () => {
@@ -86,6 +87,7 @@ const SigninScreen = ( props ) => {
 		} else {
 			console.log(error)
 			alert(error.message);
+			toggleLogin();
 		}
 	}
 	
@@ -113,26 +115,21 @@ const SigninScreen = ( props ) => {
 		alert("googleee");
 	}
 
-	const signinBtnLayout = ( e ) => {
-		if (zoomWidthMin === 0 && zoomHeightMin === 0 ) {
-			console.log(e.nativeEvent.layout);
-			zoomWidthMin = e.nativeEvent.layout.width;
-			zoomHeightMin = e.nativeEvent.layout.height;
-			zoomWidth.value = zoomWidthMin;
-			zoomHeight.value = zoomHeightMin;
+	function toggleLogin() {
+		if (!username || !password) {
+			alert("Make sure to fill out all fields!");
+			return;
 		}
-	}
-
-	function handleLogin() {
 		zoomScaleX.value = zoomScaleX.value === 0 ? 1 : 0;
 		zoomScaleY.value = zoomScaleY.value === 0 ? 1 : 0;
 		setZoomToggle(!zoomToggle)
+		Keyboard.dismiss();
 	}
 
 	return (
 		<View style={styles.container}>
 			{/* {Overlay here} */}
-			<Animated.View style={[zoomStyle, styles.overlay, {zIndex: 99, display: zoomToggle ? "flex" : "flex"}]}>
+			<Animated.View style={[zoomStyle, styles.overlay, {zIndex: 99, display: zoomToggle ? "flex" : "none"}]}>
 				<View style={{justifyContent: "center", alignItems: "center", height: "100%"}}>
 					<Text style={[styles.boldText, {color: "black", fontSize: 36}]}>Logging you in~</Text>
 					<View style={{alignItems: "center"}}>
@@ -153,7 +150,7 @@ const SigninScreen = ( props ) => {
 					<TextInput 	style={styles.input} 
 								placeholder='Username/Email' id="email" 
 								keyboardType="email-address" textContentType='username'
-								autoCapitalize='none' autoCorrect={false} autoFocus={true} autoComplete="username"
+								autoCapitalize='none' autoCorrect={false} autoComplete="username"
 								value={username} onChangeText={(value) => setUsername(value)}></TextInput>
 					<Icon style={styles.inputIcon} name="person-outline" size={24} color="#00000090" />
 				</View>
@@ -182,7 +179,7 @@ const SigninScreen = ( props ) => {
 					/>
 				</View>
 
-				<TouchableOpacity style={styles.submitBtn} onPress={() => handleLogin()}>
+				<TouchableOpacity style={styles.submitBtn} onPress={() => toggleLogin()}>
 					<Text style={[styles.boldText, {color: "white"}]}>Sign in</Text>
 				</TouchableOpacity>
 
@@ -205,18 +202,18 @@ const SigninScreen = ( props ) => {
 					</TouchableWithoutFeedback>
 				</View>
 				<View style={styles.auth_23}>
-					<TouchableWithoutFeedback onPress={() => handleAuthGithub()}>
+					<TouchableOpacity onPress={() => handleAuthGithub()}>
 						<View style={styles.authBtn}>
 							<Text style={[styles.boldText, {color: "black"}]}>Sign in with GitHub</Text>
 							<Image source={require("../assets/github-icon.png")} style={[styles.authImg, {width: 38, height: 38}]}/>
 						</View>
-					</TouchableWithoutFeedback>
-					<TouchableWithoutFeedback onPress={() => handleAuthGoogle()}>
+					</TouchableOpacity>
+					<TouchableOpacity onPress={() => handleAuthGoogle()}>
 						<View style={styles.authBtn}>
 							<Text style={[styles.boldText, {color: "black"}]}>Sign in with Google</Text>
 							<Image source={require("../assets/google-icon.png")} style={[styles.authImg, {width: 32, height: 32}]}/>
 						</View>
-					</TouchableWithoutFeedback>
+					</TouchableOpacity>
 					{/* <TouchableWithoutFeedback onPress={() => handleAuthGithub()}>
 						<Image source={require("../assets/github-icon.png")} style={{width: 38, height: 38}}/>
 					</TouchableWithoutFeedback>
@@ -252,12 +249,12 @@ const styles = StyleSheet.create({
 	title: {
 		textAlign: "center",
 		fontFamily: "MaitreeBold",
-		fontSize: "32",
+		fontSize: 32,
 	},
 	infoText: {
 		textAlign: "center",
 		fontFamily: "Maitree",
-		fontSize: "15",
+		fontSize: 15,
 		color: "#757575",
 		opacity: 0.5,
 	},
@@ -270,11 +267,11 @@ const styles = StyleSheet.create({
 	},
 	text: {
 		fontFamily: "Maitree",
-		fontSize: "18",
+		fontSize: 18,
 	},
 	boldText: {
 		fontFamily: "MaitreeBold",
-		fontSize: "18",
+		fontSize: 18,
 	},
 	iconTextInput: {
 
@@ -286,11 +283,11 @@ const styles = StyleSheet.create({
 		paddingVertical: 15,
 		paddingHorizontal: 15,
 		borderWidth: 1,
-		borderRadius: "24",
+		borderRadius: 24,
 		borderColor: "#00000030",
 		backgroundColor: "white",
 		fontFamily: "Maitree",
-		fontSize: "14",
+		fontSize: 14,
 	},
 	inputIcon: {
 		position: "absolute",

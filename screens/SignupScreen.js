@@ -2,11 +2,10 @@ import { StyleSheet, Text, TextInput, View, TouchableOpacity, Image, TouchableWi
 import React, { useState, useEffect } from 'react';
 import { CheckBox } from '../components/CheckBox';
 
-import { onAuthStateChanged,
+import { getAuth, onAuthStateChanged,
 	createUserWithEmailAndPassword,
 	signInWithEmailAndPassword,
 email } from "firebase/auth";
-import { auth } from "../firebase/config";
 import { usePromise } from '../components/PromiseHandle';
 import { StackActions } from '@react-navigation/routers';
 
@@ -27,29 +26,14 @@ var d_width = Dimensions.get('window').width; //full width
 var d_height = Dimensions.get('window').height; //full height
 
 const SignupScreen = ( props ) => {
+	const auth = getAuth();
 	const [rememberMe, setRememberMe] = useState(false);
 	const [useFaceID, setUseFaceID] = useState(false);
 	const [wasSubmitted, setWasSubmitted] = useState(false);
 
 	const [username, setUsername] = useState("");
 	const [emailCode, setEmailCode] = useState("")
-	const [password, setPassword] = useState("");
-	
-	const zoomScaleX = useSharedValue(1);
-	const zoomScaleY = useSharedValue(1);
-
-	const zoomConfig = {
-		duration: 400,
-	};
-	const zoomStyle = useAnimatedStyle(() => {
-		return {
-			transform: [
-				{scaleX: withTiming(zoomScaleX.value, zoomConfig)},
-				{scaleY: withTiming(zoomScaleY.value, zoomConfig)},
-			]
-		}
-	});
-	
+	const [password, setPassword] = useState("");	
 
 	async function handleSubmit() {
 		const [user, error] = await usePromise(createUserWithEmailAndPassword(auth, username, password))
@@ -79,17 +63,7 @@ const SignupScreen = ( props ) => {
 	}
 
 	function handleGetEmailCode() {
-
 		alert("Getting da code (wip)")
-	}
-
-	function testAnimation() {
-		setUsername("Test@gmail.com");
-		setPassword("12345678");
-		zoomScaleX.value = zoomScaleX.value === 1 ? 2 : 1;
-		zoomScaleY.value = zoomScaleY.value === 1 ? 100 : 1;
-		console.log(zoomScaleX.value);
-		console.log(zoomScaleY.value);
 	}
 
 	return (
@@ -106,7 +80,7 @@ const SignupScreen = ( props ) => {
 					<TextInput 	style={styles.input} 
 								placeholder='Username/Email' id="email" 
 								keyboardType="email-address" textContentType='username'
-								autoCapitalize='none' autoCorrect={false} autoFocus={true} autoComplete="username"
+								autoCapitalize='none' autoCorrect={false} autoComplete="username"
 								value={username} onChangeText={(value) => setUsername(value)}></TextInput>
 					<Icon style={styles.inputIcon} name="person-outline" size={24} color="#00000090" />
 				</View>
@@ -128,28 +102,22 @@ const SignupScreen = ( props ) => {
 					<Icon style={styles.inputIcon} name="lock-closed-outline" size={24} color="#00000090" />
 				</View>
 
-				<TouchableOpacity onPress={() => {
-					testAnimation();
-				}}><Text>test animation</Text></TouchableOpacity>
+				<TouchableOpacity style={styles.submitBtn} onPress={() => handleSubmit()}>
+					<Text style={[styles.boldText, {color: "white"}]}>Sign up</Text>
+				</TouchableOpacity>
 
-				<Animated.View style={zoomStyle}>
-					<TouchableOpacity style={styles.submitBtn} onPress={() => handleSubmit()}>
-						<Text style={[styles.boldText, {color: "white"}]}>Sign up</Text>
-					</TouchableOpacity>
-				</Animated.View>
-
-				<TouchableWithoutFeedback onPress={() => handleAuthGithub()}>
+				<TouchableOpacity onPress={() => handleAuthGithub()}>
 					<View style={styles.authBtn}>
 						<Text style={[styles.boldText, {color: "black"}]}>Sign in with GitHub</Text>
 						<Image source={require("../assets/github-icon.png")} style={[styles.authImg, {width: 38, height: 38}]}/>
 					</View>
-				</TouchableWithoutFeedback>
-				<TouchableWithoutFeedback onPress={() => handleAuthGoogle()}>
+				</TouchableOpacity>
+				<TouchableOpacity onPress={() => handleAuthGoogle()}>
 					<View style={styles.authBtn}>
 						<Text style={[styles.boldText, {color: "black"}]}>Sign in with Google</Text>
 						<Image source={require("../assets/google-icon.png")} style={[styles.authImg, {width: 32, height: 32}]}/>
 					</View>
-				</TouchableWithoutFeedback>
+				</TouchableOpacity>
 				<TouchableOpacity style={styles.backBtn} onPress={() => handleGotoSignin()}>
 					<View style={{justifyContent: "center"}}>
 						<Text style={[styles.boldText, {color: "black"}]}>Back to Sign In</Text>
@@ -178,12 +146,12 @@ const styles = StyleSheet.create({
 		width: 300,
 		textAlign: "center",
 		fontFamily: "MaitreeBold",
-		fontSize: "32",
+		fontSize: 32,
 	},
 	infoText: {
 		textAlign: "center",
 		fontFamily: "Maitree",
-		fontSize: "15",
+		fontSize: 15,
 		color: "#757575",
 		opacity: 0.5,
 	},
@@ -196,11 +164,11 @@ const styles = StyleSheet.create({
 	},
 	text: {
 		fontFamily: "Maitree",
-		fontSize: "18",
+		fontSize: 18,
 	},
 	boldText: {
 		fontFamily: "MaitreeBold",
-		fontSize: "18",
+		fontSize: 18,
 	},
 	iconTextInput: {
 
@@ -212,11 +180,11 @@ const styles = StyleSheet.create({
 		paddingVertical: 15,
 		paddingHorizontal: 15,
 		borderWidth: 1,
-		borderRadius: "24",
+		borderRadius: 24,
 		borderColor: "#00000030",
 		backgroundColor: "white",
 		fontFamily: "Maitree",
-		fontSize: "14",
+		fontSize: 14,
 	},
 	getCodeBtn: {
 		width: "40%",

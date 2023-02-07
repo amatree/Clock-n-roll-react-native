@@ -179,11 +179,11 @@ const styles = StyleSheet.create({
 		paddingVertical: 15,
 		paddingHorizontal: 15,
 		borderWidth: 1,
-		borderRadius: "24",
+		borderRadius: 24,
 		borderColor: "#00000030",
 		backgroundColor: "white",
 		fontFamily: "Maitree",
-		fontSize: "12",
+		fontSize: 12,
 	},
 });
 
