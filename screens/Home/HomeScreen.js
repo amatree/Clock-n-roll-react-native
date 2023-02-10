@@ -50,14 +50,14 @@ function HomeScreen ( props ) {
 	}
 
 	return (
-		<>
-			<View style={{flex: 1, alignItems: "center"}}>
+		<View style={{display: "flex"}}>
+			<View style={{alignItems: "center"}}>
 				<Text>Hi {user.displayName}, I am homescreen</Text>
 				<Button onPress={() => handleWriteData()} title="Write data"></Button>
 				<Button onPress={() => returnToLogin()} title="Log out"></Button>
 			</View>
 			{/* <BottomTabs /> */}
-		</>
+		</View>
 	)
 }
 

@@ -38,6 +38,7 @@ function StackNavigation() {
 export default function App() {
 	const [fontsLoaded] = useFonts({
 		Maitree: require("./assets/fonts/Maitree/Maitree-Regular.ttf"),
+		MaitreeSemiBold: require("./assets/fonts/Maitree/Maitree-SemiBold.ttf"),
 		MaitreeBold: require("./assets/fonts/Maitree/Maitree-Bold.ttf"),
 	});
 

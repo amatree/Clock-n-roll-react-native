@@ -6,11 +6,15 @@ import { usePromise } from '../components/PromiseHandle';
 import { getAuth } from 'firebase/auth';
 import { getDatabase, ref, set, child, get } from "firebase/database";
 
+import { useKeyboard } from "@react-native-community/hooks";
+
 function TodoScreen ( props ) {
 	const auth = getAuth();
 	const user = auth.currentUser;
 	const db = getDatabase();
 	const dbRef = ref(db);
+
+	const keyboard = useKeyboard();
 
 	const [task, setTask] = useState();
 	const [taskItems, setTaskItems] = useState({})
@@ -115,7 +119,8 @@ function TodoScreen ( props ) {
 				</ScrollView>
 			</View>
 
-			<KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.writeTaskWrapper}>
+			<KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.writeTaskWrapper}
+									keyboardVerticalOffset={140}>
 				<TextInput style={styles.input} placeholder={"Write a task"} value={task} onChangeText={text => setTask(text)} onSubmitEditing={() => handleAddTask()} />
 				<TouchableOpacity onPress={() => handleAddTask()}>
 					<View style={styles.addWrapper}>
