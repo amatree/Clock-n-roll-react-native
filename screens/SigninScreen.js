@@ -4,7 +4,7 @@ import { CheckBox } from '../components/CheckBox';
 
 import { onAuthStateChanged,
 	createUserWithEmailAndPassword,
-	signInWithEmailAndPassword } from "firebase/auth";
+	signInWithEmailAndPassword, } from "firebase/auth";
 import { getAuth } from "firebase/auth";
 import { usePromise } from '../components/PromiseHandle';
 import { StackActions } from '@react-navigation/routers';
@@ -30,6 +30,8 @@ const SigninScreen = ( props ) => {
 	const [useFaceID, setUseFaceID] = useState(false);
 	const [wasSubmitted, setWasSubmitted] = useState(false);
 	const [loggedInThruSignUp, setLoggedInThruSignUp] = useState(null);
+	const [loggedInPreviously, setLoggedInPreviously] = useState(false);
+	const [loggedInPreviouslyCheck, setLoggedInPreviouslyCheck] = useState(false);
 
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -86,10 +88,27 @@ const SigninScreen = ( props ) => {
 			}
 		}
 	}, [zoomToggle])
-	
 
+	useEffect(() => {
+		if (!loggedInPreviouslyCheck)
+		{
+			setLoggedInPreviouslyCheck(true);
+			if ( !wasSubmitted && !zoomToggle ) {
+				onAuthStateChanged(auth, user => {
+					// TODO: add face id here if toggled OR re-enter password
+					if (user && !loggedInPreviously) {
+						console.log("found previous login info..");
+						setLoggedInPreviously(true);
+						skipCredentialLogin();
+					}
+				});
+			}
+		}
+	}, [])
+	
+	
 	async function handleSubmit() {
-		if (loggedInThruSignUp)
+		if (loggedInThruSignUp || loggedInPreviously)
 		{
 			setLoggingInText("Logged in successfully!");
 			setTimeout(() => {
@@ -144,14 +163,18 @@ const SigninScreen = ( props ) => {
 			alert("Make sure to fill out all fields!");
 			return;
 		}
-		skipCredentialLogin();
+		zoomScaleX.value = zoomScaleX.value === 0 ? 1 : 0;
+		zoomScaleY.value = zoomScaleY.value === 0 ? 1 : 0;
+		setZoomToggle(!zoomToggle)
 		Keyboard.dismiss();
 	}
 
 	function skipCredentialLogin() {
-		zoomScaleX.value = zoomScaleX.value === 0 ? 1 : 0;
-		zoomScaleY.value = zoomScaleY.value === 0 ? 1 : 0;
-		setZoomToggle(!zoomToggle)
+		// zoomScaleX.value = zoomScaleX.value === 0 ? 1 : 0;
+		// zoomScaleY.value = zoomScaleY.value === 0 ? 1 : 0;
+		zoomScaleX.value = 1;
+		zoomScaleY.value = 1;
+		setZoomToggle(true)
 	}
 
 	return (

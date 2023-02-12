@@ -108,8 +108,8 @@ function FooterTab ( {isSelected = false, mainTab = false, tabName = "", tabIcon
 			borderRadius: "50%",
 			shadowOpacity: 0.5,
 			shadowOffset: {
-				width: 1,
-				height: 2,
+				width: 3,
+				height: 5,
 			},
 		},
 	});

@@ -20,7 +20,7 @@ import Animated, {
 	withRepeat,
 	withSpring,
 } from 'react-native-reanimated';
-import SignInWithProvider from '../components/HandleAuthProvider';
+import SignInWithProvider from '../services/HandleAuthProvider';
 
 var d_width = Dimensions.get('window').width; //full width
 var d_height = Dimensions.get('window').height; //full height

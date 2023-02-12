@@ -5,7 +5,7 @@ import {
 	GoogleAuthProvider,
 } from 'firebase/auth';
 import { auth as fbAuth } from '../firebase/config'
-import { usePromise } from './PromiseHandle';
+import { usePromise } from '../components/PromiseHandle';
 
 const SignInWithProvider = async ( providerName, auth=fbAuth ) => {
 	/**
