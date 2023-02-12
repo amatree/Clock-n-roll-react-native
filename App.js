@@ -30,7 +30,8 @@ function StackNavigation() {
 							}} />
 			<Stack.Screen 	name="Home" 
 							component={HomeScreenApp} 
-							options={{ headerShown: false,}} />
+							options={{ headerShown: false,}} 
+							/>
 		</Stack.Navigator>
 	)
 }

@@ -10,10 +10,10 @@ import { getAuth,
 	RecaptchaVerifier,
 	PhoneAuthProvider, } from 'firebase/auth';
 import { usePromise } from '../../components/PromiseHandle';
-import { getDatabase, ref, set } from "firebase/database";
+import { getDatabase, ref, set, update } from "firebase/database";
 
 
-function HomeScreen ( props ) {
+function HomeScreen ( {states, setStates, ...props} ) {
 	const auth = getAuth();
 	const user = auth.currentUser;
 	const db = getDatabase();
@@ -30,11 +30,12 @@ function HomeScreen ( props ) {
 	const [photoURL, setPhotoURL] = useState(user.photoURL);
 	
 	function returnToLogin() {
+		// console.log( props );
 		props.navigation.replace("Sign In");
 	}
 
 	async function handleWriteData() {
-		const [r, err] = await usePromise(set(ref(db, 'users/' + user.uid), {
+		const [r, err] = await usePromise(update(ref(db, 'users/' + user.uid), {
 		  username: user.displayName,
 		  email: email,
 		  profile_picture : user.photoURL,

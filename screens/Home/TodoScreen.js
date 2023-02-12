@@ -1,47 +1,59 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, TextInput, KeyboardAvoidingView, TouchableOpacity, Keyboard, ScrollView } from 'react-native';
-import Task from "../components/Task";
+import Task from "../../components/Task";
 
-import { usePromise } from '../components/PromiseHandle';
+import { usePromise } from '../../components/PromiseHandle';
 import { getAuth } from 'firebase/auth';
-import { getDatabase, ref, set, child, get } from "firebase/database";
+import { getDatabase, ref, set, remove, child, get, update } from "firebase/database";
 
-import { useKeyboard } from "@react-native-community/hooks";
 
-function TodoScreen ( props ) {
+function TodoScreen ( {states, setStates, ...props} ) {
 	const auth = getAuth();
 	const user = auth.currentUser;
 	const db = getDatabase();
 	const dbRef = ref(db);
 
-	const keyboard = useKeyboard();
-
 	const [task, setTask] = useState();
 	const [taskItems, setTaskItems] = useState({})
 	const [hasUnsavedChange, setHasUnsavedChange] = useState(false);
-	const [firstSync, setFirstSync] = useState(true);
+
+	const [firstSync, setFirstSync] = useState(states.firstSync);
+
+	function saveToTaskItems( tasks ) {
+		setTaskItems( tasks );
+		setStates({
+			...states,
+			firstSync: true,
+			taskItems: tasks
+		});
+	}
 
 	useEffect(() => {
-		if (firstSync)
+		if (states.taskItems && Object.keys(states.taskItems).length > Object.keys(taskItems).length) {
+			saveToTaskItems(states.taskItems);
+		}
+	}, [])
+
+	useEffect(() => {
+		if (!states.firstSync)
 		{
 			get(child(dbRef, `users/${user.uid}/tasks`)).then((snapshot) => {
 				if (snapshot.exists()) {
 					console.log("[" + new Date().toLocaleString() + "] retrieved data from db")
-					setTaskItems(snapshot.val());
+					saveToTaskItems(snapshot.val());
 				}
 			}).catch((error) => {
 				console.error(error);
 			});
-			setFirstSync(false);
 		}
-	}, [firstSync])
-
+	}, [states.firstSync])
+	
 	useEffect(() => {
 		let timer = null;
 		if (hasUnsavedChange)
 		{
-			handleWriteData();
 			setHasUnsavedChange(false);
+			handleWriteData();
 		}
 
 		return () => {
@@ -56,7 +68,7 @@ function TodoScreen ( props ) {
 	const handleAddTask = () => {
 		if (task == null)
 		{
-			setTaskItems({});
+			saveToTaskItems({});
 			setHasUnsavedChange(true);
 			return;
 		}
@@ -68,7 +80,7 @@ function TodoScreen ( props ) {
 		if (nextIdx === undefined) nextIdx = 0;
 		else nextIdx = Number(nextIdx.replace("Task", "")) + 1;
 		var newTask = {["Task"+nextIdx]: task};
-		setTaskItems({...taskItems, ...newTask});
+		saveToTaskItems({...taskItems, ...newTask});
 		setTask(null);
 		setHasUnsavedChange(true);
 	}
@@ -76,15 +88,8 @@ function TodoScreen ( props ) {
 	const handleCompleteTask = (task) => {
 		let itemsCopy = {...taskItems};
 		delete itemsCopy[task.key];
-		setTaskItems(itemsCopy);
+		saveToTaskItems(itemsCopy);
 		setHasUnsavedChange(true);
-	}
-
-	function test() {
-		console.log("======")
-		console.log("length = " + Object.keys(taskItems).length)
-		console.log(taskItems)
-		console.log("======")
 	}
 
 	async function handleWriteData() {
@@ -155,7 +160,7 @@ const styles = StyleSheet.create({
 	},
 	writeTaskWrapper: {
 		position: "absolute",
-		bottom: 20,
+		bottom: 40,
 		width: "100%",
 		flexDirection: "row",
 		justifyContent: "space-around",
