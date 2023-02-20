@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TextInput, View, TouchableOpacity, Image, TouchableWithoutFeedback, Button } from 'react-native';
+import { StyleSheet, Text, TextInput, View, TouchableOpacity, Image, TouchableWithoutFeedback, Button, PixelRatio } from 'react-native';
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import {default as MCIcon} from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from "react-native-vector-icons/Ionicons";
@@ -36,11 +36,12 @@ function Footer( {setScreens, ...props} ) {
 			justifyContent: "space-around",
 			alignItems: "center",
 			backgroundColor: "white",
-			shadowOpacity: 0.5,
+			shadowOpacity: 1.5,
 			shadowOffset: {
 				width: 1,
 				height: 2,
 			},
+			elevation: 5,
 		},
 	});
 
@@ -88,9 +89,10 @@ function Footer( {setScreens, ...props} ) {
 function FooterTab ( {isSelected = false, mainTab = false, tabName = "", tabIcon = "", iconType = "", iconSize = 30, iconColor = "black", onPress, ...props} ) {	
 	const styles = StyleSheet.create({
 		tabWrapper: {
+			display: "flex",
 			alignItems: "center",
 			justifyContent: "center",
-			paddingBottom: !mainTab && 12,
+			paddingBottom: !mainTab ? 12 : 0,
 			width: "20%",
 			height: "100%",
 		},
@@ -105,12 +107,21 @@ function FooterTab ( {isSelected = false, mainTab = false, tabName = "", tabIcon
 			bottom: 25,
 			justifyContent: "center",
 			alignItems: "center",
-			borderRadius: "50%",
+			borderRadius: 45,
 			shadowOpacity: 0.5,
 			shadowOffset: {
 				width: 3,
 				height: 5,
 			},
+			elevation: 2,
+		},
+		selected: {
+			position: "absolute",
+			backgroundColor: "gray",
+			opacity: 0.1,
+			width: 60,
+			height: 60,
+			borderRadius: 30,
 		},
 	});
 
@@ -128,6 +139,7 @@ function FooterTab ( {isSelected = false, mainTab = false, tabName = "", tabIcon
 		<TouchableWithoutFeedback onPress={onPress}>
 			<View style={[styles.tabWrapper, props.style, mainTab && styles.mainTab]}>
 				{isSelected && <Text style={[props.style, {position: "absolute", bottom: mainTab ? 17 : 25}]}>_____</Text>}
+				{/* {isSelected && <View style={[styles.selected]}></View>} */}
 				{tabIcon && getIcon()}
 				{tabName && <Text style={styles.tabText}>{tabName}</Text>}
 			</View>

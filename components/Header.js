@@ -18,6 +18,7 @@ function Header ( {text, style, ...props} ) {
 				width: 1,
 				height: 2,
 			},
+			elevation: 5,
 		},
 		text: {
 			fontFamily: "MaitreeSemiBold",
