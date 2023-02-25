@@ -21,7 +21,7 @@ import {
 	RecaptchaVerifier,
 	PhoneAuthProvider,
 } from "firebase/auth";
-import { usePromise } from "../../components/PromiseHandle";
+import { usePromise } from "../components/PromiseHandle";
 import { getDatabase, ref, set, update } from "firebase/database";
 
 import Animated, {
@@ -40,32 +40,47 @@ import Animated, {
 var d_width = Dimensions.get("window").width; //full width
 var d_height = Dimensions.get("window").height; //full height
 
-function BigButton({ text = "click me", ...props }) {
+function BigButton({ text = "click me", spinCircleColor = "black", ...props }) {
 	const [isPressingIn, setIsPressingIn] = useState(false);
-	const [btnRotation, setBtnRotation] = useState(360);
 
 	const btnCircleRun = useSharedValue(0);
-	const btnAnimStyle = useAnimatedStyle(() => {
+	const btnSpinStyle = useAnimatedStyle(() => {
 		return {
-			// borderTopWidth: a_value / Math.PI,
 			transform: [{ rotate: interpolate(btnCircleRun.value, [0, 360], [0, 360]) + "deg" }],
+		};
+	});
+	const btnPressValue = useSharedValue(0);
+	const btnPressStyle = useAnimatedStyle(() => {
+		return {
+			transform: [{ scale: btnPressValue.value }],
 		};
 	});
 
 	useEffect(() => {
+		btnPressValue.value = withSpring(1, {duration: 500});
+		btnCircleRun.value = withRepeat(
+			withTiming(560, {duration: 10000}), -1, false
+		);
+	}, []);
+
+	useEffect(() => {
+		if (isPressingIn) {
+			// TODO: await for response then activate animation
+			btnPressValue.value = withTiming(0, {duration: 400});
+			setIsPressingIn(false);
+		}
 	}, [isPressingIn])
 
 	function handleOnPress() {
-		setIsPressingIn(false);
-		btnCircleRun.value = withSpring(0);
-		props.onPress && props.onPress();
+		// btnCircleRun.value = withSpring(-360, {duration: 600});
+		// props.onPress && props.onPress();
+		// btnPressValue.value = withSpring(0, {duration: 1000});
+		setIsPressingIn(true);
 	}
 	
 	async function handlePressIn() {
-		setIsPressingIn(true);
-		btnCircleRun.value = withSequence(
-			withSpring(145, {duration: 0.1}),
-			withSpring(360, {duration: 0.1}),
+		btnCircleRun.value = withRepeat(
+			withTiming(7200, {duration: 10000}), -1, false
 		);
 		props.onPressIn && props.onPressIn();
 	}
@@ -76,11 +91,13 @@ function BigButton({ text = "click me", ...props }) {
 			alignItems: "center",
 			width: 0.8 * d_width,
 			height: 0.8 * d_width,
-			backgroundColor: "black",
+			backgroundColor: spinCircleColor,
 			borderRadius: 0.8 * d_width,
-			borderColor: "black",
-			borderTopWidth: 1,
-			borderRightWidth: 1,
+			borderColor: spinCircleColor,
+			borderTopWidth: 3,
+			borderRightWidth: 1.5,
+			borderBottomWidth: 0.75,
+			borderLeftWidth: 0.75 / 2,
 		},
 		bigbtnShadow: {
 			width: 0.8 * d_width,
@@ -113,60 +130,55 @@ function BigButton({ text = "click me", ...props }) {
 			onPress={() => {
 				handleOnPress();
 			}}>
-			<View style={styles.bigbtnShadow}>
-				<Animated.View style={btnAnimStyle}>
-					<View style={[styles.bigbtn, props.style]} />
-				</Animated.View>
-				<Text style={[styles.text]}>{text}</Text>
-			</View>
+			<Animated.View style={btnPressStyle}>
+				<View style={styles.bigbtnShadow}>
+					<Animated.View style={btnSpinStyle}>
+						<View style={[styles.bigbtn, props.style]} />
+					</Animated.View>
+					<Text style={[styles.text]}>{text}</Text>
+				</View>
+			</Animated.View>
 		</TouchableWithoutFeedback>
 	);
 }
 
-function HomeScreen({ states, setStates, ...props }) {
-	const auth = getAuth();
-	const user = auth.currentUser;
-	const db = getDatabase();
+function AppTest({ states, setStates, ...props }) {
+	const [stateNav, setStateNav] = useState(0);
+	const [currState, setCurrState] = useState(null);
 
-	if (!user) {
-		console.error("no access to home page");
-		signOutAndReturnToLogin();
-		return;
-	}
-
-	const [displayName, setDisplayName] = useState(user.displayName);
-	const [email, setEmail] = useState(user.email);
-	const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber);
-	const [photoURL, setPhotoURL] = useState(user.photoURL);
-
-	async function signOutAndReturnToLogin() {
-		console.log("logged out!");
-		auth.signOut().then(() => {
-			props.navigation.replace("Sign In");
-		});
-	}
-
-	async function handleWriteData() {
-		const [r, err] = await usePromise(
-			update(ref(db, "users/" + user.uid), {
-				username: user.displayName,
-				email: email,
-				profile_picture: user.photoURL,
-				last_login: new Date().toLocaleString(),
-			})
-		);
-
-		if (err) {
-			alert(err.message);
+	async function handleBigButton() {
+		props.popupModal("ihii");
+		if (stateNav > 2) {
+			setStateNav(0)
 		} else {
-			alert("success!");
+			setStateNav(stateNav + 1)
 		}
 	}
-
-	function handleBigButton() {
-		// console.log("clicked the big button");
-	}
-
+	
+	useEffect(() => {
+		setCurrState(stateNav === 0 ?
+		<BigButton start
+		text={"Select a job to clock in.."}
+		spinCircleColor="black"
+		style={{ backgroundColor: "#D0D0D0" }}
+		onFinish={() => handleBigButton()}
+		/> :
+		stateNav === 1 ?
+		<BigButton start
+		text={"Press to clock in~"}
+		spinCircleColor="#707070"
+		style={{ backgroundColor: "#7CFF81" }}
+		onFinish={() => handleBigButton()}
+		/> :
+		<BigButton start
+		text={"Clock out now~!"}
+		spinCircleColor="#D0D0D0"
+		style={{ backgroundColor: "#FF3939" }}
+		onFinish={() => handleBigButton()}
+		/>
+		);
+	}, [stateNav])
+	
 	return (
 		<View
 			style={{
@@ -176,11 +188,7 @@ function HomeScreen({ states, setStates, ...props }) {
 				paddingBottom: 24,
 				height: "100%",
 			}}>
-			<BigButton
-				text={"Select a job to clock in.."}
-				style={{ backgroundColor: "#D0D0D0" }}
-				onPress={() => handleBigButton()}
-			/>
+			{ currState }
 			{/* <BottomTabs /> */}
 		</View>
 	);
@@ -201,4 +209,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export { HomeScreen };
+export { AppTest };

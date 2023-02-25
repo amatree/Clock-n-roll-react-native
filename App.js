@@ -1,14 +1,23 @@
-import { StyleSheet, Text, View, Dimensions } from "react-native";
+import { StyleSheet, Text, View, Dimensions, Button, Pressable } from "react-native";
 import { useFonts } from "expo-font";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from '@react-navigation/stack';
 
 import { HomeScreenApp } from "./screens/Home/HomeApp";
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import { SigninScreen } from "./screens/SigninScreen";
 import { SignupScreen } from "./screens/SignupScreen";
+
+// APP_TEST HERE
+// Import screen/React component as Apptest! i.e.
+// import {default as AppTest} from '...';
+import { AppTest } from "./test/AppTest";
+import { PopupModal } from "./components/PopupModal";
+import { TouchableOpacity } from "react-native-gesture-handler";
+const APP_TEST = true;
+
 
 const Stack = createStackNavigator();
 
@@ -43,8 +52,30 @@ export default function App() {
 		MaitreeBold: require("./assets/fonts/Maitree/Maitree-Bold.ttf"),
 	});
 
+	const [modalVisible, setModalVisible] = useState(false);
+	const [modalMessage, setModalMessage] = useState("eee");
+	
+	async function showModal(message) {
+		setModalMessage(message);
+		setModalVisible(true);
+	}
+	
 	if (!fontsLoaded) {
 		return null;
+	}
+
+	if (APP_TEST) {
+		return (
+			<>
+				<PopupModal 
+					type={"yn"} 
+					message={modalMessage} 
+					modalVisible={modalVisible} 
+					setModalVisible={setModalVisible}
+				/>
+				<AppTest popupModal={showModal} />
+			</>
+		);
 	}
 
 	return (
