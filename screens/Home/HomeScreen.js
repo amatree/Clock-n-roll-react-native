@@ -37,91 +37,10 @@ import Animated, {
 	cancelAnimation,
 } from "react-native-reanimated";
 
+import BigButton from "../../components/BigButton";
+
 var d_width = Dimensions.get("window").width; //full width
 var d_height = Dimensions.get("window").height; //full height
-
-function BigButton({ text = "click me", ...props }) {
-	const [isPressingIn, setIsPressingIn] = useState(false);
-	const [btnRotation, setBtnRotation] = useState(360);
-
-	const btnCircleRun = useSharedValue(0);
-	const btnAnimStyle = useAnimatedStyle(() => {
-		return {
-			// borderTopWidth: a_value / Math.PI,
-			transform: [{ rotate: interpolate(btnCircleRun.value, [0, 360], [0, 360]) + "deg" }],
-		};
-	});
-
-	useEffect(() => {
-	}, [isPressingIn])
-
-	function handleOnPress() {
-		setIsPressingIn(false);
-		btnCircleRun.value = withSpring(0);
-		props.onPress && props.onPress();
-	}
-	
-	async function handlePressIn() {
-		setIsPressingIn(true);
-		btnCircleRun.value = withSequence(
-			withSpring(145, {duration: 0.1}),
-			withSpring(360, {duration: 0.1}),
-		);
-		props.onPressIn && props.onPressIn();
-	}
-
-	const styles = StyleSheet.create({
-		bigbtn: {
-			justifyContent: "center",
-			alignItems: "center",
-			width: 0.8 * d_width,
-			height: 0.8 * d_width,
-			backgroundColor: "black",
-			borderRadius: 0.8 * d_width,
-			borderColor: "black",
-			borderTopWidth: 1,
-			borderRightWidth: 1,
-		},
-		bigbtnShadow: {
-			width: 0.8 * d_width,
-			height: 0.8 * d_width,
-			borderRadius: 0.8 * d_width,
-			shadowOpacity: 0.5,
-			shadowOffset: {
-				width: 5,
-				height: 10,
-			},
-			borderColor: "#E0E0E0",
-			borderLeftWidth: 3,
-		},
-		text: {
-			position: "relative",
-			top: -0.445 * d_width,
-			fontFamily: "MaitreeBold",
-			fontSize: 24,
-			textAlign: "center",
-			paddingHorizontal: 12,
-		},
-	});
-
-	return (
-		<TouchableWithoutFeedback
-			{...props}
-			onPressIn={() => {
-				handlePressIn();
-			}}
-			onPress={() => {
-				handleOnPress();
-			}}>
-			<View style={styles.bigbtnShadow}>
-				<Animated.View style={btnAnimStyle}>
-					<View style={[styles.bigbtn, props.style]} />
-				</Animated.View>
-				<Text style={[styles.text]}>{text}</Text>
-			</View>
-		</TouchableWithoutFeedback>
-	);
-}
 
 function HomeScreen({ states, setStates, ...props }) {
 	const auth = getAuth();
@@ -134,6 +53,42 @@ function HomeScreen({ states, setStates, ...props }) {
 		return;
 	}
 
+	// button configs
+	const [stateNav, setStateNav] = useState(0);
+	const [currBtn, setCurrBtn] = useState(<></>);
+	const firstBtn = {
+		text: "Select a job to clock in..",
+		spinCircleColor: "black",
+		spinCircleColor: "#D0D0D0",
+		style: { backgroundColor: "#D0D0D0" },
+		onFinish: () => handleBigButton(),
+	};
+	const secondBtn = {
+		text: "Press to clock in~",
+		spinCircleColor: "#707070",
+		spinCircleColor: "#D0D0D0",
+		style: { backgroundColor: "#7CFF81" },
+		onFinish: () => handleBigButton(),
+	};
+	const thirdBtn = {
+		text: "Clock out now~!",
+		spinCircleColor: "#D0D0D0",
+		style: { backgroundColor: "#FF3939", color: "#FFFFFF" },
+		onFinish: () => handleBigButton(),
+	};
+	const bigbtn_1 = <BigButton {...firstBtn} state={stateNav} />;
+	const bigbtn_2 = <BigButton {...secondBtn} state={stateNav} />;
+	const bigbtn_3 = <BigButton {...thirdBtn} state={stateNav} />;
+
+	async function handleBigButton() {
+		if (stateNav + 1 > 2) {
+			setStateNav(0);
+		} else {
+			setStateNav(stateNav + 1);
+		}
+	}
+
+	// user configs
 	const [displayName, setDisplayName] = useState(user.displayName);
 	const [email, setEmail] = useState(user.email);
 	const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber);
@@ -163,10 +118,6 @@ function HomeScreen({ states, setStates, ...props }) {
 		}
 	}
 
-	function handleBigButton() {
-		// console.log("clicked the big button");
-	}
-
 	return (
 		<View
 			style={{
@@ -176,11 +127,7 @@ function HomeScreen({ states, setStates, ...props }) {
 				paddingBottom: 24,
 				height: "100%",
 			}}>
-			<BigButton
-				text={"Select a job to clock in.."}
-				style={{ backgroundColor: "#D0D0D0" }}
-				onPress={() => handleBigButton()}
-			/>
+			{stateNav === 0 ? bigbtn_1 : stateNav === 1 ? bigbtn_2 : bigbtn_3}
 			{/* <BottomTabs /> */}
 		</View>
 	);
