@@ -26,23 +26,192 @@ import Animated, {
 	cancelAnimation,
 } from "react-native-reanimated";
 
+// ===========================================================
+// const setup:
+// ===========================================================
+// const [modalStates, setModalStates] = useState({
+// 	visible: false,
+// 	message: "",
+// });
+// const [modalOptions, setModalOptions] = useState({
+// 	type: "ync",
+// 	child: undefined,
+// 	onClose: () => {},
+// 	onYes: () => {},
+// 	onNo: () => {},
+// 	onCancel: () => {},
+// 	onOk: () => {},
+// 	afterClose: () => {},
+// });
+
+// function ShowAlert(message, options = modalOptions) {
+// 	setModalOptions({
+// 		...modalOptions,
+// 		...options,
+// 	});
+// 	setModalStates({
+// 		...modalStates,
+// 		message: message,
+// 		visible: true,
+// 	});
+// }
+//
+// ===========================================================
+// render setup:
+// ===========================================================
+// {modalStates.visible && 
+// 	<PopupModal
+// 		visible={modalStates.visible}
+// 		message={modalStates.message}
+// 		states={setModalStates}
+// 		options={modalOptions}
+// 	/>}
+//
+// MUST BE PLACED INSIDE THE NEEDED COMPONENT TO PREVENT PARENT RERENDERING
+
 // type include:
 // "c": close [0]
 // "oc": ok/cancel [1]
 // "yn": yes/no [2]
 // "ync": yes/no/cancel [3]
-const PopupModalTypes = ["c", "oc", "yn", "ync"];
-function GetButtonComps({
-		type = "c", 
-		onClose = () => {}, 
-		onYes = () => {}, 
-		onNo = () => {}, 
-		onCancel = () => {}, 
-		onOk = () => {}, 
-		defaultCallback = () => {},
-		...props
-	}) {
+// "y": yes [4]
+const PopupModalTypes = ["c", "oc", "yn", "ync", "y"];
 
+// giving "options" will override all action functions and props
+function PopupModal({
+	type = "c",
+	message = "",
+	states = {},
+	options = {},
+	child = undefined,
+	onClose = () => {},
+	onYes = () => {},
+	onNo = () => {},
+	onCancel = () => {},
+	onOk = () => {},
+	visible = false,
+	afterClose = () => {},
+	...props
+}) {
+	var typeSel =
+		options.type === "" ? type.toLowerCase() : options.type.toLowerCase();
+	if (!PopupModalTypes.includes(typeSel)) {
+		typeSel = PopupModalTypes[0];
+	}
+	const [modalVisible, setModalVisible] = useState(visible);
+	
+	if (options.child !== undefined && options.child.props.children !== 0) {
+		child = options.child;
+	}
+
+	return (
+		<View style={styles.background}>
+			<Modal
+				animationType={props.animationType || "none"}
+				transparent={true}
+				visible={visible}
+				onRequestClose={() => {
+					setModalVisible(!visible);
+					if (states) {
+						states({ visible: !visible });
+					}
+					options.afterClose.toString().length > 0
+						? options.afterClose()
+						: afterClose();
+				}}>
+				<View style={styles.centeredView}>
+					<View style={styles.modalView}>
+						{!child ? (
+							<>
+								<Text style={styles.modalText}>{message}</Text>
+								<GetButtonComps
+									type={typeSel}
+									onClose={
+										options.onClose.toString().length > 0
+											? options.onClose
+											: onClose
+									}
+									onYes={
+										options.onYes.toString().length > 0
+											? options.onYes
+											: onYes
+									}
+									onNo={
+										options.onNo.toString().length > 0
+											? options.onNo
+											: onNo
+									}
+									onCancel={
+										options.onCancel.toString().length > 0
+											? options.onCancel
+											: onCancel
+									}
+									onOk={
+										options.onOk.toString().length > 0
+											? options.onOk
+											: onOk
+									}
+									defaultCallback={() => {
+										setModalVisible(!visible);
+										if (states) {
+											states({ visible: !visible });
+										}
+										options.afterClose.toString().length > 0
+											? options.afterClose()
+											: afterClose();
+									}}
+								/>
+							</>
+						) : (
+							<>{child}</>
+						)}
+					</View>
+				</View>
+			</Modal>
+		</View>
+	);
+}
+
+const styles = StyleSheet.create({
+	centeredView: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		backgroundColor: "#0000005D",
+	},
+	modalView: {
+		margin: 20,
+		backgroundColor: "white",
+		borderRadius: 27,
+		padding: 30,
+		alignItems: "center",
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 2,
+			height: 5,
+		},
+		shadowOpacity: 0.35,
+		shadowRadius: 4,
+		elevation: 5,
+	},
+	modalText: {
+		fontSize: 18,
+		marginBottom: 15,
+		textAlign: "center",
+		fontFamily: "Maitree",
+	},
+});
+
+function GetButtonComps({
+	type = "c",
+	onClose = () => {},
+	onYes = () => {},
+	onNo = () => {},
+	onCancel = () => {},
+	onOk = () => {},
+	defaultCallback = () => {},
+	...props
+}) {
 	const styles = StyleSheet.create({
 		default: {
 			...props.style,
@@ -50,7 +219,7 @@ function GetButtonComps({
 			alignSelf: "flex-end",
 		},
 		button: {
-			marginTop: 30,
+			marginTop: 15,
 			marginHorizontal: 5,
 			borderRadius: 10,
 			padding: 10,
@@ -153,6 +322,19 @@ function GetButtonComps({
 				</TouchableOpacity>
 			</View>
 		);
+	} else if (type === "y") {
+		return (
+			<View style={styles.default}>
+				<TouchableOpacity
+					style={[styles.button, styles.buttonNormal]}
+					onPress={() => {
+						defaultCallback();
+						onYes();
+					}}>
+					<Text style={styles.textStyle}>Yes</Text>
+				</TouchableOpacity>
+			</View>
+		);
 	}
 
 	return (
@@ -168,69 +350,5 @@ function GetButtonComps({
 		</View>
 	);
 }
-
-function PopupModal({ type = "c", message, child, onClose, onYes, onNo, onCancel, onOk, modalVisible = false, setModalVisible, ...props }) {
-	var typeSel = type.toLowerCase();
-	if (!PopupModalTypes.includes(typeSel)) {
-		typeSel = PopupModalTypes[0];
-	}
-	
-	return (
-		<View style={styles.background}>
-			<Modal
-				animationType="fade"
-				transparent={true}
-				visible={modalVisible}
-				onRequestClose={() => {
-					setModalVisible(!modalVisible);
-				}}>
-				<View style={styles.centeredView}>
-					<View style={styles.modalView}>
-						<Text style={styles.modalText}>{message}</Text>
-						<GetButtonComps 
-							type={typeSel}
-							onClose={onClose} 
-							onYes={onYes} 
-							onNo={onNo} 
-							onCancel={onCancel} 
-							onOk={onOk} 
-							defaultCallback={() => setModalVisible(!modalVisible)} 
-						/>
-					</View>
-				</View>
-			</Modal>
-		</View>
-	);
-}
-
-const styles = StyleSheet.create({
-	centeredView: {
-		flex: 1,
-		justifyContent: "center",
-		alignItems: "center",
-		backgroundColor: "#0000005D",
-	},
-	modalView: {
-		margin: 20,
-		backgroundColor: "white",
-		borderRadius: 27,
-		padding: 35,
-		alignItems: "center",
-		shadowColor: "#000",
-		shadowOffset: {
-			width: 2,
-			height: 5,
-		},
-		shadowOpacity: 0.35,
-		shadowRadius: 4,
-		elevation: 5,
-	},
-	modalText: {
-		fontSize: 18,
-		marginBottom: 15,
-		textAlign: "center",
-		fontFamily: "Maitree"
-	},
-});
 
 export { PopupModal };

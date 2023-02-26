@@ -18,6 +18,7 @@ import Animated, {
 	Easing,
 	withRepeat,
 	withSpring,
+	call,
 } from 'react-native-reanimated';
 
 var d_width = Dimensions.get('window').width; //full width
@@ -33,8 +34,11 @@ const SigninScreen = ( props ) => {
 	const [loggedInPreviously, setLoggedInPreviously] = useState(false);
 	const [loggedInPreviouslyCheck, setLoggedInPreviouslyCheck] = useState(false);
 
+	const [callbackFn, setCallbackFn] = useState(undefined);
+
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
+	const [inputChange, setInputChange] = useState(false);
 	
 	const zoomScaleX = useSharedValue(0);
 	const zoomScaleY = useSharedValue(0);
@@ -106,7 +110,6 @@ const SigninScreen = ( props ) => {
 		}
 	}, [])
 	
-	
 	async function handleSubmit() {
 		if (loggedInThruSignUp || loggedInPreviously)
 		{
@@ -129,7 +132,7 @@ const SigninScreen = ( props ) => {
 			}, Math.random() * 500);
 		} else {
 			console.log(error)
-			alert(error.message);
+			props.showAlert(error.message);
 			toggleLogin();
 		}
 	}
@@ -141,26 +144,26 @@ const SigninScreen = ( props ) => {
 	}
 
 	function handleForgotPassword() {
-		alert("currently implementing :3");
 		setUsername("Test@gmail.com");
 		setPassword("12345678");
+		// props.showAlert("currently implementing :3");
 	}
 
 	function handleAuthFaceID() {
-		alert("FaceIDing...");
+		props.showAlert("FaceIDing...");
 	}
 
 	function handleAuthGithub() {
-		alert("Github");
+		props.showAlert("Github");
 	}
 	
 	function handleAuthGoogle() {
-		alert("googleee");
+		props.showAlert("googleee");
 	}
 
 	function toggleLogin() {
 		if (!username || !password) {
-			alert("Make sure to fill out all fields!");
+			props.showAlert("Make sure to fill out all fields!");
 			return;
 		}
 		zoomScaleX.value = zoomScaleX.value === 0 ? 1 : 0;

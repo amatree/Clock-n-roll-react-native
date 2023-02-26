@@ -1,75 +1,137 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, TextInput, KeyboardAvoidingView, TouchableOpacity, Keyboard, ScrollView } from 'react-native';
+import React, { useEffect, useState, lazy, Suspense } from "react";
+import {
+	StyleSheet,
+	Text,
+	View,
+	TextInput,
+	KeyboardAvoidingView,
+	TouchableOpacity,
+	Keyboard,
+	ScrollView,
+} from "react-native";
 import Task from "../../components/Task";
 
-import { usePromise } from '../../components/PromiseHandle';
-import { getAuth } from 'firebase/auth';
-import { getDatabase, ref, set, remove, child, get, update } from "firebase/database";
+import { usePromise } from "../../components/PromiseHandle";
+import { getAuth } from "firebase/auth";
+import {
+	getDatabase,
+	ref,
+	set,
+	remove,
+	child,
+	get,
+	update,
+} from "firebase/database";
 
+import { showModal } from "../../App";
+import LoadingScreen from "../../components/LoadingScreen";
+import { PopupModal } from "../../components/PopupModal";
+import { LengthOf } from "../../utils/utils";
 
-function TodoScreen ( {states, setStates, ...props} ) {
+function TodoScreen({ states, setStates, ...props }) {
 	const auth = getAuth();
 	const user = auth.currentUser;
 	const db = getDatabase();
 	const dbRef = ref(db);
 
 	const [task, setTask] = useState();
-	const [taskItems, setTaskItems] = useState({})
+	const [taskItems, setTaskItems] = useState({});
 	const [hasUnsavedChange, setHasUnsavedChange] = useState(false);
 
 	const [firstSync, setFirstSync] = useState(states.firstSync);
 
-	function saveToTaskItems( tasks ) {
-		setTaskItems( tasks );
+	const [modalStates, setModalStates] = useState({
+		visible: false,
+		message: "",
+	});
+	const [modalOptions, setModalOptions] = useState({
+		type: "ync",
+		child: undefined,
+		onClose: () => {},
+		onYes: () => {},
+		onNo: () => {},
+		onCancel: () => {},
+		onOk: () => {},
+		afterClose: () => {},
+	});
+
+	function ShowAlert(message, options = modalOptions) {
+		setModalOptions({
+			...modalOptions,
+			...options,
+		});
+		setModalStates({
+			...modalStates,
+			message: message,
+			visible: true,
+		});
+	}
+
+	function saveToTaskItems(tasks) {
+		setTaskItems(tasks);
 		setStates({
 			...states,
-			firstSync: true,
-			taskItems: tasks
+			taskItems: tasks,
 		});
 	}
 
 	useEffect(() => {
-		if (states.taskItems && Object.keys(states.taskItems).length > Object.keys(taskItems).length) {
+		if (
+			states.taskItems &&
+			Object.keys(states.taskItems).length > Object.keys(taskItems).length
+		) {
 			saveToTaskItems(states.taskItems);
 		}
-	}, [])
+	}, []);
 
 	useEffect(() => {
-		if (!states.firstSync)
-		{
-			get(child(dbRef, `users/${user.uid}/tasks`)).then((snapshot) => {
-				if (snapshot.exists()) {
-					console.log("[" + new Date().toLocaleString() + "] retrieved data from db")
-					saveToTaskItems(snapshot.val());
-				}
-			}).catch((error) => {
-				console.error(error);
-			});
+		if (!states.firstSync) {
+			get(child(dbRef, `users/${user.uid}/tasks`))
+				.then((snapshot) => {
+					if (snapshot.exists()) {
+						console.log(
+							"[" + new Date().toLocaleString() + "] retrieved data from db"
+						);
+						saveToTaskItems(snapshot.val());
+					}
+				})
+				.catch((error) => {
+					console.error(error);
+				})
+				.finally(() => {
+					setStates({
+						...states,
+						firstSync: true,
+					});
+				});
 		}
-	}, [states.firstSync])
-	
+	}, [states.firstSync]);
+
 	useEffect(() => {
 		let timer = null;
-		if (hasUnsavedChange)
-		{
+		if (hasUnsavedChange) {
 			setHasUnsavedChange(false);
 			handleWriteData();
 		}
 
 		return () => {
-			if (timer)
-			{
+			if (timer) {
 				clearTimeout(timer);
 				setHasUnsavedChange(false);
 			}
-		}
-	}, [hasUnsavedChange])
+		};
+	}, [hasUnsavedChange]);
 
 	const handleAddTask = () => {
-		if (task == null)
-		{
-			saveToTaskItems({});
-			setHasUnsavedChange(true);
+		if (task == null) {
+			if (LengthOf(taskItems) === 0) return;
+			ShowAlert("Do you want to remove all tasks?", {
+				type: "yn",
+				onYes: () => {
+					saveToTaskItems({});
+					setHasUnsavedChange(true);
+				},
+			});
 			return;
 		}
 
@@ -79,72 +141,92 @@ function TodoScreen ( {states, setStates, ...props} ) {
 		var nextIdx = allItems[allItems.length - 1];
 		if (nextIdx === undefined) nextIdx = 0;
 		else nextIdx = Number(nextIdx.replace("Task", "")) + 1;
-		var newTask = {["Task"+nextIdx]: task};
-		saveToTaskItems({...taskItems, ...newTask});
+		var newTask = { ["Task" + nextIdx]: task };
+		saveToTaskItems({ ...taskItems, ...newTask });
 		setTask(null);
 		setHasUnsavedChange(true);
-	}
-	
+	};
+
 	const handleCompleteTask = (task) => {
-		let itemsCopy = {...taskItems};
+		let itemsCopy = { ...taskItems };
 		delete itemsCopy[task.key];
 		saveToTaskItems(itemsCopy);
 		setHasUnsavedChange(true);
-	}
+	};
 
 	async function handleWriteData() {
-		const [r, err] = await usePromise(set(ref(db, 'users/' + user.uid + '/tasks'), taskItems));
-		if (err)
-		{
+		const [r, err] = await usePromise(
+			set(ref(db, "users/" + user.uid + "/tasks"), taskItems)
+		);
+		if (err) {
 			alert(err.message);
 		} else {
-			console.log("[" + new Date().toLocaleString() + "] data synced!")
+			console.log("[" + new Date().toLocaleString() + "] data synced!");
 		}
 	}
 
+	if (!states.firstSync) {
+		return <LoadingScreen text="Loading tasks..." />;
+	}
+
 	return (
-		<View style={styles.container}>
+		<>
+			{modalStates.visible && (
+				<PopupModal
+					visible={modalStates.visible}
+					message={modalStates.message}
+					states={setModalStates}
+					options={modalOptions}
+				/>
+			)}
+			<View style={styles.container}>
+				<View style={styles.tasksWrapper}>
+					{/* <TouchableOpacity onPress={() => test()}><Text style={{textDecorationLine: "underline"}}>{"<Click to view items in console>"}</Text></TouchableOpacity> */}
+					<Text style={styles.sectionTitle}>Today's tasks</Text>
 
-			<View style={styles.tasksWrapper}>
-				{/* <TouchableOpacity onPress={() => test()}><Text style={{textDecorationLine: "underline"}}>{"<Click to view items in console>"}</Text></TouchableOpacity> */}
-				<Text style={styles.sectionTitle}>Today's tasks</Text>
-
-				<ScrollView style={styles.items}>
-					{
-						Object.entries(taskItems).map((taskItem, idx) => {
-							var key = taskItem[0]
-							var value = taskItem[1]
+					<ScrollView style={styles.items}>
+						{Object.entries(taskItems).map((taskItem, idx) => {
+							var key = taskItem[0];
+							var value = taskItem[1];
 							return (
-								<TouchableOpacity key={key} onPress={() => handleCompleteTask({key, value})}>
+								<TouchableOpacity
+									key={key}
+									onPress={() => handleCompleteTask({ key, value })}>
 									<Task text={value} key={key} />
 								</TouchableOpacity>
 							);
-						})
-					}
-				</ScrollView>
-			</View>
+						})}
+					</ScrollView>
+				</View>
 
-			<KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.writeTaskWrapper}
-									keyboardVerticalOffset={140}>
-				<TextInput style={styles.input} placeholder={"Write a task"} value={task} onChangeText={text => setTask(text)} onSubmitEditing={() => handleAddTask()} />
-				<TouchableOpacity onPress={() => handleAddTask()}>
-					<View style={styles.addWrapper}>
-						<Text style={styles.addText}>+</Text>
-					</View>
-				</TouchableOpacity>
-			</KeyboardAvoidingView>
-		</View>
+				<KeyboardAvoidingView
+					behavior={Platform.OS === "ios" ? "padding" : "height"}
+					style={styles.writeTaskWrapper}
+					keyboardVerticalOffset={140}>
+					<TextInput
+						style={styles.input}
+						placeholder={"Write a task"}
+						value={task}
+						onChangeText={(text) => setTask(text)}
+						onSubmitEditing={() => handleAddTask()}
+					/>
+					<TouchableOpacity onPress={() => handleAddTask()}>
+						<View style={styles.addWrapper}>
+							<Text style={styles.addText}>+</Text>
+						</View>
+					</TouchableOpacity>
+				</KeyboardAvoidingView>
+			</View>
+		</>
 	);
 }
 
-export { 
-	TodoScreen,
-}
+export { TodoScreen };
 
 const styles = StyleSheet.create({
 	container: {
-	  flex: 1,
-	  backgroundColor: "#E8EAED"
+		flex: 1,
+		backgroundColor: "#E8EAED",
 	},
 	tasksWrapper: {
 		paddingTop: 40,

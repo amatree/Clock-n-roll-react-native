@@ -37,6 +37,8 @@ import Animated, {
 	cancelAnimation,
 } from "react-native-reanimated";
 
+import styles from "./AppTest.css";
+
 var d_width = Dimensions.get("window").width; //full width
 var d_height = Dimensions.get("window").height; //full height
 
@@ -50,13 +52,13 @@ function AppTest({ states, setStates, ...props }) {
 				paddingBottom: 24,
 				height: "100%",
 			}}>
-			<Text>this is text</Text>
+			<Text style={styles.blue}>this is text</Text>
 			{/* <BottomTabs /> */}
 		</View>
 	);
 }
 
-const styles = StyleSheet.create({
+const s_styles = StyleSheet.create({
 	input: {
 		marginBottom: 20,
 		width: "100%",

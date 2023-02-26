@@ -9,7 +9,7 @@ import {
 	TouchableWithoutFeedback,
 	Button,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, lazy, Suspense } from "react";
 
 import Animated, {
 	useSharedValue,

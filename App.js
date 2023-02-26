@@ -12,7 +12,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
 import { HomeScreenApp } from "./screens/Home/HomeApp";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 
 import { SigninScreen } from "./screens/SigninScreen";
 import { SignupScreen } from "./screens/SignupScreen";
@@ -22,41 +22,14 @@ import { SignupScreen } from "./screens/SignupScreen";
 // import {default as AppTest} from '...';
 import { AppTest } from "./test/AppTest";
 import { PopupModal } from "./components/PopupModal";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import LoadingScreen from "./components/LoadingScreen";
+
 const APP_TEST = false;
 
 const Stack = createStackNavigator();
 
 var d_width = Dimensions.get("window").width; //full width
 var d_height = Dimensions.get("window").height; //full height
-
-function StackNavigation() {
-	return (
-		<Stack.Navigator
-			initialRouteName="Sign In"
-			screenOptions={{ headerShown: false }}>
-			<Stack.Screen
-				name="Sign In"
-				component={SigninScreen}
-				options={{
-					cardStyle: [styles.container, { backgroundColor: "#BDE3FF" }],
-				}}
-			/>
-			<Stack.Screen
-				name="Sign Up"
-				component={SignupScreen}
-				options={{
-					cardStyle: [styles.container, { backgroundColor: "#FDE3FF" }],
-				}}
-			/>
-			<Stack.Screen
-				name="Home"
-				component={HomeScreenApp}
-				options={{ headerShown: false }}
-			/>
-		</Stack.Navigator>
-	);
-}
 
 export default function App() {
 	const [fontsLoaded] = useFonts({
@@ -65,54 +38,79 @@ export default function App() {
 		MaitreeBold: require("./assets/fonts/Maitree/Maitree-Bold.ttf"),
 	});
 
-	const [modalVisible, setModalVisible] = useState(false);
-	const [modalMessage, setModalMessage] = useState("eee");
-	const [modalSettings, setModalSettings] = useState({});
+	// const [modalVisible, setModalVisible] = useState(false);
+	// const [modalMessage, setModalMessage] = useState("eee");
+	// const [modalSettings, setModalSettings] = useState({});
+	// const ModalComponent = () => {
+	// 	return (
+	// 		<PopupModal
+	// 			message={modalMessage}
+	// 			modalVisible={modalVisible}
+	// 			setModalVisible={setModalVisible}
+	// 			{...modalSettings}
+	// 		/>
+	// 	);
+	// };
 
-	async function showModal(
-		message,
-		type = "oc",
-		onClose,
-		onYes,
-		onNo,
-		onCancel,
-		onOk
-	) {
-		setModalSettings({
-			type,
-			onClose,
-			onYes,
-			onNo,
-			onCancel,
-			onOk,
-		});
-		setModalMessage(message);
-		setModalVisible(true);
+	// async function showModal( message, callback = () => {}, settings = {} ) {
+	// 	setModalSettings({
+	// 		...settings,
+	// 		afterClose: callback,
+	// 	});
+	// 	setModalMessage(message);
+	// 	setModalVisible(true);
+	// }
+
+	const childProps = {
+		// showAlert: showModal,
+	};
+
+	function StackNavigation() {
+		return (
+			<Stack.Navigator
+				initialRouteName="Sign In"
+				screenOptions={{ headerShown: false }}>
+				<Stack.Screen
+					name="Sign In"
+					options={{
+						cardStyle: [styles.container, { backgroundColor: "#BDE3FF" }],
+					}}>
+					{(props) => <SigninScreen {...props} {...childProps} />}
+				</Stack.Screen>
+				<Stack.Screen
+					name="Sign Up"
+					options={{
+						cardStyle: [styles.container, { backgroundColor: "#FDE3FF" }],
+					}}>
+					{(props) => <SignupScreen {...props} {...childProps} />}
+				</Stack.Screen>
+				<Stack.Screen name="Home" options={{ headerShown: false }}>
+					{(props) => <HomeScreenApp {...props} {...childProps} />}
+				</Stack.Screen>
+			</Stack.Navigator>
+		);
 	}
 
 	if (!fontsLoaded) {
-		return null;
+		return (
+			<LoadingScreen text="Loading resources..." />
+		);
 	}
 
 	if (APP_TEST) {
 		return (
 			<>
-				<PopupModal
-					type={"yn"}
-					message={modalMessage}
-					modalVisible={modalVisible}
-					setModalVisible={setModalVisible}
-					{...modalSettings}
-				/>
-				<AppTest popupModal={showModal} />
+				<AppTest />
 			</>
 		);
 	}
 
 	return (
-		<NavigationContainer>
-			<StackNavigation />
-		</NavigationContainer>
+		<>
+			<NavigationContainer>
+				<StackNavigation />
+			</NavigationContainer>
+		</>
 	);
 }
 
