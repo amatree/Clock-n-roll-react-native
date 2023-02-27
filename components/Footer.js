@@ -1,8 +1,7 @@
-import { StyleSheet, Text, TextInput, View, TouchableOpacity, Image, TouchableWithoutFeedback, Button, PixelRatio } from 'react-native';
+import { StyleSheet, Text, TextInput, View, TouchableOpacity, Image, TouchableWithoutFeedback, Button, PixelRatio, Platform } from 'react-native';
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import {default as MCIcon} from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from "react-native-vector-icons/Ionicons";
-
 
 function Footer( {setScreens, ...props} ) {
 	const [selections, setSelections] = useState({
@@ -42,6 +41,7 @@ function Footer( {setScreens, ...props} ) {
 				height: 2,
 			},
 			elevation: 5,
+			borderTopWidth: Platform.OS === "android" && 0.5,
 		},
 	});
 

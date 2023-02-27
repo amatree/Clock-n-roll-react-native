@@ -8,6 +8,7 @@ import {
 	TouchableOpacity,
 	Keyboard,
 	ScrollView,
+	Platform,
 } from "react-native";
 import Task from "../../components/Task";
 
@@ -21,18 +22,20 @@ import {
 	child,
 	get,
 	update,
+	onValue,
 } from "firebase/database";
 
 import { showModal } from "../../App";
 import LoadingScreen from "../../components/LoadingScreen";
 import { PopupModal } from "../../components/PopupModal";
-import { LengthOf } from "../../utils/utils";
+import { getIcon, lengthOf } from "../../utils/Utils";
 
 function TodoScreen({ states, setStates, ...props }) {
 	const auth = getAuth();
 	const user = auth.currentUser;
 	const db = getDatabase();
 	const dbRef = ref(db);
+	const taskRef = ref(db, "users/" + user.uid + "/tasks")
 
 	const [task, setTask] = useState();
 	const [taskItems, setTaskItems] = useState({});
@@ -75,6 +78,27 @@ function TodoScreen({ states, setStates, ...props }) {
 		});
 	}
 
+	const [marginBottomAndroid, setMarginBottomAndroid] = useState(0);
+
+	useEffect(() => {
+		const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
+			if (Platform.OS === "android") {
+				setMarginBottomAndroid(35);
+			}
+		})
+		const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+			if (Platform.OS === "android") {
+				setMarginBottomAndroid(5);
+			}
+		})
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+
+	}, []);
+
 	useEffect(() => {
 		if (
 			states.taskItems &&
@@ -82,7 +106,12 @@ function TodoScreen({ states, setStates, ...props }) {
 		) {
 			saveToTaskItems(states.taskItems);
 		}
-	}, []);
+		
+		onValue(taskRef, (snapshot) => {
+			const data = snapshot.val();
+			setTaskItems(data ? data : {});
+		})
+	}, [])
 
 	useEffect(() => {
 		if (!states.firstSync) {
@@ -124,7 +153,8 @@ function TodoScreen({ states, setStates, ...props }) {
 
 	const handleAddTask = () => {
 		if (task == null) {
-			if (LengthOf(taskItems) === 0) return;
+			if (lengthOf(taskItems) === 0) return;
+			Keyboard.dismiss();
 			ShowAlert("Do you want to remove all tasks?", {
 				type: "yn",
 				onYes: () => {
@@ -134,8 +164,6 @@ function TodoScreen({ states, setStates, ...props }) {
 			});
 			return;
 		}
-
-		Keyboard.dismiss();
 
 		var allItems = Object.keys(taskItems);
 		var nextIdx = allItems[allItems.length - 1];
@@ -200,8 +228,8 @@ function TodoScreen({ states, setStates, ...props }) {
 				</View>
 
 				<KeyboardAvoidingView
-					behavior={Platform.OS === "ios" ? "padding" : "height"}
-					style={styles.writeTaskWrapper}
+					behavior={Platform.select({ios: "padding", android: null})}
+					style={[styles.writeTaskWrapper, {flex: 1, marginBottom: marginBottomAndroid}]}
 					keyboardVerticalOffset={140}>
 					<TextInput
 						style={styles.input}
@@ -212,7 +240,8 @@ function TodoScreen({ states, setStates, ...props }) {
 					/>
 					<TouchableOpacity onPress={() => handleAddTask()}>
 						<View style={styles.addWrapper}>
-							<Text style={styles.addText}>+</Text>
+							{task ? getIcon("plus-box-outline", "M") : getIcon("trash-outline")}
+							{/* <Text style={styles.addText}>{task ? "+" : "❌"}</Text> */}
 						</View>
 					</TouchableOpacity>
 				</KeyboardAvoidingView>
@@ -239,10 +268,11 @@ const styles = StyleSheet.create({
 	},
 	items: {
 		marginTop: 30,
+		height: "100%",
 	},
 	writeTaskWrapper: {
 		position: "absolute",
-		bottom: 40,
+		bottom: Platform.OS === "ios" ? 45 : 50,
 		width: "100%",
 		flexDirection: "row",
 		justifyContent: "space-around",
@@ -257,6 +287,12 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		width: 250,
 		paddingLeft: 15,
+		shadowOpacity: 0.5,
+		shadowOffset: {
+			width: 1,
+			height: 1,
+		},
+		elevation: 2,
 	},
 	addWrapper: {
 		width: 60,
@@ -265,7 +301,18 @@ const styles = StyleSheet.create({
 		borderRadius: 60,
 		justifyContent: "center",
 		alignItems: "center",
-		borderWidth: 1,
+		shadowOpacity: 0.5,
+		shadowOffset: {
+			width: 1,
+			height: 1,
+		},
+		elevation: 2,
+		paddingLeft: 2,
+		// borderWidth: 0.5,
 	},
-	addText: {},
+	addText: {
+		textAlign: "center",
+		fontFamily: "MaitreeBold",
+		fontSize: 12,
+	},
 });

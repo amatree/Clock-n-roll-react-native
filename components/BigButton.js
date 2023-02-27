@@ -102,6 +102,7 @@ export default function BigButton({
 			borderRightWidth: 1.5,
 			borderBottomWidth: 0.75,
 			borderLeftWidth: 0.75 / 2,
+			elevation: 5,
 		},
 		bigbtnShadow: {
 			width: 0.8 * d_width,
@@ -112,6 +113,7 @@ export default function BigButton({
 				width: 5,
 				height: 10,
 			},
+			elevation: 5,
 			borderColor: "#E0E0E0",
 			borderLeftWidth: 3,
 		},

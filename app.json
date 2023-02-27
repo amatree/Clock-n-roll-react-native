@@ -22,7 +22,8 @@
       "supportsTablet": true
     },
     "android": {
-	  "softwareKeyboardLayoutMode": "adjustNothing",
+	  "softwareKeyboardLayoutMode": "pan",
+    "windowSoftInputMode": "adjustPan",
 	  "googleServicesFile": "./firebase/google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
