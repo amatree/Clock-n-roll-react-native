@@ -84,7 +84,7 @@ export default function App() {
 					}}>
 					{(props) => <SignupScreen {...props} {...childProps} />}
 				</Stack.Screen>
-				<Stack.Screen name="Home" options={{ headerShown: false }}>
+				<Stack.Screen name="HomeApp" options={{ headerShown: false }}>
 					{(props) => <HomeScreenApp {...props} {...childProps} />}
 				</Stack.Screen>
 			</Stack.Navigator>
@@ -92,9 +92,7 @@ export default function App() {
 	}
 
 	if (!fontsLoaded) {
-		return (
-			<LoadingScreen text="Loading resources..." />
-		);
+		return <LoadingScreen text="Loading resources..." />;
 	}
 
 	if (APP_TEST) {

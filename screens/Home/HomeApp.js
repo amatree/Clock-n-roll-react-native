@@ -13,11 +13,46 @@ import { TodoScreen } from "./TodoScreen";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { PopupModal } from "../../components/PopupModal";
 
-// const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator();
 
-function HomeScreenApp( props ) {
+function HomeScreenApp(props) {
+	// modal setup
+	const [modalStates, setModalStates] = useState({
+		visible: false,
+		message: "",
+	});
+	const [modalOptions, setModalOptions] = useState({
+		type: "ync",
+		child: undefined,
+		onClose: () => {},
+		onYes: () => {},
+		onNo: () => {},
+		onCancel: () => {},
+		onOk: () => {},
+		afterClose: () => {},
+	});
+
+	function ShowAlert(message, options = modalOptions) {
+		setModalOptions({
+			...modalOptions,
+			...options,
+		});
+		setModalStates({
+			...modalStates,
+			message: message,
+			visible: true,
+		});
+	}
+
+	// child props
+	const childProps = {
+		ShowAlert: ShowAlert,
+	};
+
+	// screens setup
 	const [profileScreenStates, setProfileScreenStates] = useState({
 		firstSync: false,
 	});
@@ -39,6 +74,7 @@ function HomeScreenApp( props ) {
 			<ProfileScreen
 				states={profileScreenStates}
 				setStates={setProfileScreenStates}
+				{...childProps}
 				{...props}
 			/>
 		),
@@ -46,6 +82,7 @@ function HomeScreenApp( props ) {
 			<HistoryScreen
 				states={historyScreenStates}
 				setStates={setHistoryScreenStates}
+				{...childProps}
 				{...props}
 			/>
 		),
@@ -53,6 +90,7 @@ function HomeScreenApp( props ) {
 			<HomeScreen
 				states={homeScreenStates}
 				setStates={setHomeScreenStates}
+				{...childProps}
 				{...props}
 			/>
 		),
@@ -60,6 +98,7 @@ function HomeScreenApp( props ) {
 			<TodoScreen
 				states={exportScreenStates}
 				setStates={setExportScreenStates}
+				{...childProps}
 				{...props}
 			/>
 		),
@@ -67,6 +106,7 @@ function HomeScreenApp( props ) {
 			<SettingsScreen
 				states={settingsScreenStates}
 				setStates={setSettingsScreenStates}
+				{...childProps}
 				{...props}
 			/>
 		),
@@ -80,21 +120,26 @@ function HomeScreenApp( props ) {
 		settings: false,
 	});
 
-	useEffect(() => {
-		
-	}, [renderingScreens]);
+	useEffect(() => {}, [renderingScreens]);
 
 	const styles = StyleSheet.create({
 		container: {
 			flex: 1,
-			maxHeight: "77%",
 		},
 	});
 	return (
 		<>
+			{modalStates.visible && (
+				<PopupModal
+					visible={modalStates.visible}
+					message={modalStates.message}
+					states={setModalStates}
+					options={modalOptions}
+				/>
+			)}
 			<Header text="Clock'n'roll" />
 			<View style={styles.container}>
-				{renderingScreens.profile ? (
+				{/* {renderingScreens.profile ? (
 					screens.profile
 				) : renderingScreens.history ? (
 					screens.history
@@ -106,33 +151,55 @@ function HomeScreenApp( props ) {
 					screens.settings
 				) : (
 					<Text>Nothin' here :3</Text>
-				)}
-				{/* <Tab.Navigator>
-			<Tab.Screen name="Home Page" component={HomeScreen} 
-			options={{
-				tabBarIcon: ({ color, size }) => (
-					<MCIcon name="home" color={color} size={size} />
-					),
-					headerShown: false,
-				}}/>
-				<Tab.Screen name="To-do List" component={TodoScreen} 
-				options={{
-					tabBarIcon: ({ color, size }) => (
-						<MCIcon name="bell" color={color} size={size} />
-						),
-						headerShown: false,
-					}}/>
-					<Tab.Screen name="Settings" component={SettingsScreen} 
-					options={{
-						tabBarIcon: ({ color, size }) => (
-							<MCIcon name="cog" color={color} size={size} />
+				)} */}
+				<Tab.Navigator initialRouteName="Home" tabBar={(tabProps) => <Footer {...tabProps} />}>
+					<Tab.Screen name="Profile" options={{ headerShown: false }}>
+						{() => screens.profile}
+					</Tab.Screen>
+					<Tab.Screen name="History" options={{ headerShown: false }}>
+						{() => screens.history}
+					</Tab.Screen>
+					<Tab.Screen name="Home" options={{ headerShown: false }}>
+						{() => screens.home}
+					</Tab.Screen>
+					<Tab.Screen name="Export" options={{ headerShown: false }}>
+						{() => screens.export}
+					</Tab.Screen>
+					<Tab.Screen name="Settings" options={{ headerShown: false }}>
+						{() => screens.settings}
+					</Tab.Screen>
+					{/* <Tab.Screen
+						name="Home Page"
+						component={HomeScreen}
+						options={{
+							tabBarIcon: ({ color, size }) => (
+								<MCIcon name="home" color={color} size={size} />
 							),
 							headerShown: false,
-						}}/>
-					</Tab.Navigator> */}
+						}}
+					/>
+					<Tab.Screen
+						name="To-do List"
+						component={TodoScreen}
+						options={{
+							tabBarIcon: ({ color, size }) => (
+								<MCIcon name="bell" color={color} size={size} />
+							),
+							headerShown: false,
+						}}
+					/>
+					<Tab.Screen
+						name="Settings"
+						component={SettingsScreen}
+						options={{
+							tabBarIcon: ({ color, size }) => (
+								<MCIcon name="cog" color={color} size={size} />
+							),
+							headerShown: false,
+						}}
+					/> */}
+				</Tab.Navigator>
 			</View>
-
-			<Footer screens={screens} setScreens={setRenderingScreens} />
 		</>
 	);
 }

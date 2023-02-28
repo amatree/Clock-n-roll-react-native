@@ -2,8 +2,9 @@ import { StyleSheet, Text, TextInput, View, TouchableOpacity, Image, TouchableWi
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import {default as MCIcon} from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from "react-native-vector-icons/Ionicons";
+import { Capitalize } from '../utils/Utils';
 
-function Footer( {setScreens, ...props} ) {
+function Footer( {setScreens = undefined, ...props} ) {
 	const [selections, setSelections] = useState({
 		"profile": false,
 		"history": false,
@@ -21,13 +22,14 @@ function Footer( {setScreens, ...props} ) {
 			"settings": false,
 		};
 		n_selections[sel] = true;
-		setScreens(n_selections);
+		// setScreens(n_selections);
 		setSelections(n_selections);
+		props.navigation.navigate(Capitalize(sel));
 	}
 
 	const styles = StyleSheet.create({
 		footer: {
-			position: "absolute",
+			position: "relative",
 			bottom: 0,
 			width: "100%",
 			height: 95,

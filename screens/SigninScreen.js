@@ -78,7 +78,7 @@ const SigninScreen = ( props ) => {
 
 				let timer2 = setTimeout(() => {
 					handleSubmit();
-				}, (Math.random() + 0.1) * 1500);
+				}, (Math.random() + 0.1) * 500);
 				timers.push(timer2);
 
 			}, (Math.random() + 0.01) * 1000);
@@ -116,7 +116,7 @@ const SigninScreen = ( props ) => {
 			setLoggingInText("Logged in successfully!");
 			setTimeout(() => {
 				props.navigation.dispatch(
-					props.navigation.replace("Home", {rememberMe: rememberMe, useFaceID: useFaceID}),
+					props.navigation.replace("HomeApp", {rememberMe: rememberMe, useFaceID: useFaceID}),
 				);
 			}, Math.random() * 500);
 			return;
@@ -127,7 +127,7 @@ const SigninScreen = ( props ) => {
 			setLoggingInText("Logged in successfully!");
 			setTimeout(() => {
 				props.navigation.dispatch(
-					props.navigation.replace("Home", {rememberMe: rememberMe, useFaceID: useFaceID}),
+					props.navigation.replace("HomeApp", {rememberMe: rememberMe, useFaceID: useFaceID}),
 				);
 			}, Math.random() * 500);
 		} else {

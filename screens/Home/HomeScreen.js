@@ -38,6 +38,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import BigButton from "../../components/BigButton";
+import { JobSelectionScreen } from "../../components/JobSelection";
 
 var d_width = Dimensions.get("window").width; //full width
 var d_height = Dimensions.get("window").height; //full height
@@ -53,9 +54,15 @@ function HomeScreen({ states, setStates, ...props }) {
 		return;
 	}
 
+	useEffect(() => {
+		if (!states.firstSync)
+		{
+			setStates({...states, firstSync: true});
+		}
+	}, [states])
+
 	// button configs
 	const [stateNav, setStateNav] = useState(0);
-	const [currBtn, setCurrBtn] = useState(<></>);
 	const firstBtn = {
 		text: "Select a job to clock in..",
 		spinCircleColor: "black",
@@ -76,10 +83,12 @@ function HomeScreen({ states, setStates, ...props }) {
 		style: { backgroundColor: "#FF3939", color: "#FFFFFF" },
 		onFinish: () => handleBigButton(),
 	};
-	const bigbtn_1 = <BigButton {...firstBtn} state={stateNav} />;
-	const bigbtn_2 = <BigButton {...secondBtn} state={stateNav} />;
-	const bigbtn_3 = <BigButton {...thirdBtn} state={stateNav} />;
+	const bigbtn_1 = <BigButton {...firstBtn} />;
+	const bigbtn_2 = <BigButton {...secondBtn} />;
+	const bigbtn_3 = <BigButton {...thirdBtn} />;
+	const [showBigButton, setShowBigButton] = useState(true);
 
+	const [mainComponent, setMainComponent] = useState(null);
 	async function handleBigButton() {
 		if (stateNav + 1 > 2) {
 			setStateNav(0);
@@ -87,6 +96,24 @@ function HomeScreen({ states, setStates, ...props }) {
 			setStateNav(stateNav + 1);
 		}
 	}
+
+	function handleJobSelection(result) {
+		console.log(result);
+	}
+
+	useEffect(() => {
+		if (stateNav === 1) {
+			// selecting job
+			setMainComponent(<JobSelectionScreen callback={() => {
+				setShowBigButton(true);
+			}} {...props}/>);
+			setShowBigButton(false);
+		}
+	}, [stateNav, states]);
+
+	useEffect(() => {
+		// console.log(showBigButton);
+	}, [showBigButton])
 
 	// user configs
 	const [displayName, setDisplayName] = useState(user.displayName);
@@ -127,7 +154,7 @@ function HomeScreen({ states, setStates, ...props }) {
 				paddingBottom: 24,
 				height: "100%",
 			}}>
-			{stateNav === 0 ? bigbtn_1 : stateNav === 1 ? bigbtn_2 : bigbtn_3}
+			{showBigButton ? stateNav === 0 ? bigbtn_1 : stateNav === 1 ? bigbtn_2 : bigbtn_3 : mainComponent}
 			{/* <BottomTabs /> */}
 		</View>
 	);

@@ -25,10 +25,9 @@ import {
 	onValue,
 } from "firebase/database";
 
-import { showModal } from "../../App";
 import LoadingScreen from "../../components/LoadingScreen";
 import { PopupModal } from "../../components/PopupModal";
-import { getIcon, lengthOf } from "../../utils/Utils";
+import { getIcon, LengthOf } from "../../utils/Utils";
 
 function TodoScreen({ states, setStates, ...props }) {
 	const auth = getAuth();
@@ -42,33 +41,6 @@ function TodoScreen({ states, setStates, ...props }) {
 	const [hasUnsavedChange, setHasUnsavedChange] = useState(false);
 
 	const [firstSync, setFirstSync] = useState(states.firstSync);
-
-	const [modalStates, setModalStates] = useState({
-		visible: false,
-		message: "",
-	});
-	const [modalOptions, setModalOptions] = useState({
-		type: "ync",
-		child: undefined,
-		onClose: () => {},
-		onYes: () => {},
-		onNo: () => {},
-		onCancel: () => {},
-		onOk: () => {},
-		afterClose: () => {},
-	});
-
-	function ShowAlert(message, options = modalOptions) {
-		setModalOptions({
-			...modalOptions,
-			...options,
-		});
-		setModalStates({
-			...modalStates,
-			message: message,
-			visible: true,
-		});
-	}
 
 	function saveToTaskItems(tasks) {
 		setTaskItems(tasks);
@@ -153,9 +125,9 @@ function TodoScreen({ states, setStates, ...props }) {
 
 	const handleAddTask = () => {
 		if (task == null) {
-			if (lengthOf(taskItems) === 0) return;
+			if (LengthOf(taskItems) === 0) return;
 			Keyboard.dismiss();
-			ShowAlert("Do you want to remove all tasks?", {
+			props.ShowAlert("Do you want to remove all tasks?", {
 				type: "yn",
 				onYes: () => {
 					saveToTaskItems({});
@@ -199,14 +171,6 @@ function TodoScreen({ states, setStates, ...props }) {
 
 	return (
 		<>
-			{modalStates.visible && (
-				<PopupModal
-					visible={modalStates.visible}
-					message={modalStates.message}
-					states={setModalStates}
-					options={modalOptions}
-				/>
-			)}
 			<View style={styles.container}>
 				<View style={styles.tasksWrapper}>
 					{/* <TouchableOpacity onPress={() => test()}><Text style={{textDecorationLine: "underline"}}>{"<Click to view items in console>"}</Text></TouchableOpacity> */}

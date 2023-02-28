@@ -60,7 +60,7 @@ export default function BigButton({
 			-1,
 			false
 		);
-	}, [props.state || null]);
+	}, []);
 
 	useEffect(() => {
 		if (isPressingIn) {
