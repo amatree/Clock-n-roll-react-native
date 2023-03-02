@@ -22,6 +22,7 @@ import Animated, {
 	withSequence,
 	EasingNode,
 	cancelAnimation,
+	runOnJS,
 } from "react-native-reanimated";
 
 var d_width = Dimensions.get("window").width; //full width
@@ -55,18 +56,20 @@ export default function BigButton({
 
 	useEffect(() => {
 		btnPressValue.value = withSpring(1, { duration: 500 });
-		btnCircleRun.value = withRepeat(
-			withTiming(480, { duration: 10000 }),
-			-1,
-			false
-		);
+		// btnCircleRun.value = withRepeat(
+		// 	withTiming(480, { duration: 10000 }),
+		// 	-1,
+		// 	false
+		// );
 	}, []);
 
 	useEffect(() => {
 		if (isPressingIn) {
 			// TODO: await for response then activate animation
 			setIsPressingIn(false);
-			btnPressValue.value = withTiming(0, { duration: 400 });
+			btnPressValue.value = withTiming(0, { duration: 400 }, () => {
+				runOnJS(onFinish)();
+			});
 		}
 	}, [isPressingIn]);
 
@@ -76,8 +79,8 @@ export default function BigButton({
 		// btnPressValue.value = withSpring(0, {duration: 1000});
 		setIsPressingIn(true);
 		setTimeout(() => {
-			onFinish();
-		}, 400);
+			// onFinish();
+		}, 500);
 	}
 
 	async function handlePressIn() {

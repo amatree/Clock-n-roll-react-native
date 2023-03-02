@@ -59,7 +59,7 @@ import Animated, {
 // ===========================================================
 // render setup:
 // ===========================================================
-// {modalStates.visible && 
+// {modalStates.visible &&
 // 	<PopupModal
 // 		visible={modalStates.visible}
 // 		message={modalStates.message}
@@ -99,76 +99,64 @@ function PopupModal({
 		typeSel = PopupModalTypes[0];
 	}
 	const [modalVisible, setModalVisible] = useState(visible);
-	
+
 	if (options.child !== undefined && options.child.props.children !== 0) {
 		child = options.child;
 	}
 
 	return (
-		<View style={styles.background}>
-			<Modal
-				animationType={props.animationType || "none"}
-				transparent={true}
-				visible={visible}
-				onRequestClose={() => {
-					setModalVisible(!visible);
-					if (states) {
-						states({ visible: !visible });
-					}
-					options.afterClose.toString().length > 0
-						? options.afterClose()
-						: afterClose();
-				}}>
-				<View style={styles.centeredView}>
-					<View style={styles.modalView}>
-						{!child ? (
-							<>
-								<Text style={styles.modalText}>{message}</Text>
-								<GetButtonComps
-									type={typeSel}
-									onClose={
-										options.onClose.toString().length > 0
-											? options.onClose
-											: onClose
+		<Modal
+			animationType={props.animationType || "none"}
+			transparent={true}
+			visible={visible}
+			onRequestClose={() => {
+				setModalVisible(!visible);
+				if (states) {
+					states({ visible: !visible });
+				}
+				options.afterClose.toString().length > 0
+					? options.afterClose()
+					: afterClose();
+			}}>
+			<View style={styles.centeredView}>
+				<View style={styles.modalView}>
+					{!child ? (
+						<>
+							<Text style={styles.modalText}>{message}</Text>
+							<GetButtonComps
+								type={typeSel}
+								onClose={
+									options.onClose.toString().length > 0
+										? options.onClose
+										: onClose
+								}
+								onYes={
+									options.onYes.toString().length > 0 ? options.onYes : onYes
+								}
+								onNo={options.onNo.toString().length > 0 ? options.onNo : onNo}
+								onCancel={
+									options.onCancel.toString().length > 0
+										? options.onCancel
+										: onCancel
+								}
+								onOk={options.onOk.toString().length > 0 ? options.onOk : onOk}
+								defaultCallback={() => {
+									setModalVisible(!visible);
+									if (states) {
+										states({ visible: !visible });
 									}
-									onYes={
-										options.onYes.toString().length > 0
-											? options.onYes
-											: onYes
-									}
-									onNo={
-										options.onNo.toString().length > 0
-											? options.onNo
-											: onNo
-									}
-									onCancel={
-										options.onCancel.toString().length > 0
-											? options.onCancel
-											: onCancel
-									}
-									onOk={
-										options.onOk.toString().length > 0
-											? options.onOk
-											: onOk
-									}
-									defaultCallback={() => {
-										setModalVisible(!visible);
-										if (states) {
-											states({ visible: !visible });
-										}
-										options.afterClose.toString().length > 0
-											? options.afterClose()
-											: afterClose();
-									}}
-								/>
-							</>
-						) : (
-							<>{child}</>
-						)}
-					</View>
+									options.afterClose.toString().length > 0
+										? options.afterClose()
+										: afterClose();
+								}}
+							/>
+						</>
+					) : (
+						<>{child}</>
+					)}
 				</View>
-			</Modal>
-		</View>
+			</View>
+		</Modal>
 	);
 }
 
@@ -238,7 +226,7 @@ function GetButtonComps({
 		buttonNormal: {
 			backgroundColor: "#2196F3",
 		},
-		buttonNo: {
+		buttonFocus: {
 			backgroundColor: "#E26DE6",
 		},
 		textStyle: {
@@ -255,7 +243,7 @@ function GetButtonComps({
 		return (
 			<View style={styles.default}>
 				<TouchableOpacity
-					style={[styles.button, styles.buttonNormal]}
+					style={[styles.button, styles.buttonFocus]}
 					onPress={() => {
 						defaultCallback();
 						onOk();
@@ -276,7 +264,7 @@ function GetButtonComps({
 		return (
 			<View style={styles.default}>
 				<TouchableOpacity
-					style={[styles.button, styles.buttonNormal]}
+					style={[styles.button, styles.buttonFocus]}
 					onPress={() => {
 						defaultCallback();
 						onYes();
@@ -284,7 +272,7 @@ function GetButtonComps({
 					<Text style={styles.textStyle}>Yes</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
-					style={[styles.button, styles.buttonNo]}
+					style={[styles.button, styles.buttonNormal]}
 					onPress={() => {
 						defaultCallback();
 						onNo();
@@ -297,7 +285,7 @@ function GetButtonComps({
 		return (
 			<View style={styles.default}>
 				<TouchableOpacity
-					style={[styles.button, styles.buttonNormal]}
+					style={[styles.button, styles.buttonFocus]}
 					onPress={() => {
 						defaultCallback();
 						onYes();
@@ -305,7 +293,7 @@ function GetButtonComps({
 					<Text style={styles.textStyle}>Yes</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
-					style={[styles.button, styles.buttonNo]}
+					style={[styles.button, styles.buttonNormal]}
 					onPress={() => {
 						defaultCallback();
 						onNo();
@@ -326,7 +314,7 @@ function GetButtonComps({
 		return (
 			<View style={styles.default}>
 				<TouchableOpacity
-					style={[styles.button, styles.buttonNormal]}
+					style={[styles.button, styles.buttonFocus]}
 					onPress={() => {
 						defaultCallback();
 						onYes();
@@ -340,7 +328,7 @@ function GetButtonComps({
 	return (
 		<View style={styles.default}>
 			<TouchableOpacity
-				style={[styles.button, styles.buttonNormal]}
+				style={[styles.button, styles.buttonFocus]}
 				onPress={() => {
 					defaultCallback();
 					onClose();

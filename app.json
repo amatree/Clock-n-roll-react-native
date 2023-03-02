@@ -18,13 +18,17 @@
       "**/*"
     ],
     "ios": {
-	  "googleServicesFile": "./firebase/GoogleService-Info.plist",
-      "supportsTablet": true
+      "googleServicesFile": "./firebase/GoogleService-Info.plist",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Clock'n'roll uses FaceID and, or TouchID to authenticate."
+      },
+      "bundleIdentifier": "com.amatree.Clocknrollreactnative"
     },
     "android": {
-	  "softwareKeyboardLayoutMode": "pan",
-    "windowSoftInputMode": "adjustPan",
-	  "googleServicesFile": "./firebase/google-services.json",
+      "softwareKeyboardLayoutMode": "pan",
+      "windowSoftInputMode": "adjustPan",
+      "googleServicesFile": "./firebase/google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
@@ -35,7 +39,16 @@
     },
     "packagerOpts": {
       "config": "metro.config.js",
-      "sourceExts": ["js", "jsx", "css"]
+      "sourceExts": [
+        "js",
+        "jsx",
+        "css"
+      ]
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c6ee8106-34aa-445b-80bf-acae49c3d75e"
+      }
     }
   }
 }

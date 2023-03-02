@@ -37,12 +37,36 @@ import Animated, {
 	cancelAnimation,
 } from "react-native-reanimated";
 
-import styles from "./AppTest.css";
+import * as LocalAuthentication from "expo-local-authentication";
 
 var d_width = Dimensions.get("window").width; //full width
 var d_height = Dimensions.get("window").height; //full height
 
 function AppTest({ states, setStates, ...props }) {
+	const [isBiometricSupported, setIsBiometricSupported] = useState(false);
+	const [result, setResult] = useState("")
+
+	useEffect(() => {
+		checkBiometrics();
+
+		if (isBiometricSupported) {
+			handleBiometricAuth();
+		}
+	}, [isBiometricSupported]);
+
+	const handleBiometricAuth = async () => {
+		const biometricAuth = await LocalAuthentication.authenticateAsync({
+			promptMessage: "Login with Biometrics",
+			disableDeviceFallback: true,
+		});
+
+		setResult(biometricAuth.warning);
+	};
+
+	async function checkBiometrics() {
+		setIsBiometricSupported(await LocalAuthentication.hasHardwareAsync());
+	}
+
 	return (
 		<View
 			style={{
@@ -53,12 +77,13 @@ function AppTest({ states, setStates, ...props }) {
 				height: "100%",
 			}}>
 			<Text style={styles.blue}>this is text</Text>
+			<Text>{result}</Text>
 			{/* <BottomTabs /> */}
 		</View>
 	);
 }
 
-const s_styles = StyleSheet.create({
+const styles = StyleSheet.create({
 	input: {
 		marginBottom: 20,
 		width: "100%",
@@ -70,6 +95,9 @@ const s_styles = StyleSheet.create({
 		backgroundColor: "white",
 		fontFamily: "Maitree",
 		fontSize: 12,
+	},
+	blue: {
+		color: "blue",
 	},
 });
 

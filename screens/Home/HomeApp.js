@@ -47,9 +47,30 @@ function HomeScreenApp(props) {
 		});
 	}
 
+	const [foregroundOptions, setForegroundOptions] = useState({
+		active: false,
+		color: "#00000000",
+		child: <></>,
+	});
+
+	function ToggleForeground({opacity = 0.7, child = <></>}) {
+		const transparency = "#000000" + Math.floor((1 - Math.min(opacity, 1)) * 255).toString(16);
+		setForegroundOptions({
+			...foregroundOptions,
+			active: !foregroundOptions.active,
+			color: !foregroundOptions.active ? transparency : "#00000000",
+			child: child,
+		});
+	}
+
+	useEffect(() => {
+
+	}, [])
+
 	// child props
 	const childProps = {
 		ShowAlert: ShowAlert,
+		ToggleForeground: ToggleForeground,
 	};
 
 	// screens setup
@@ -127,6 +148,7 @@ function HomeScreenApp(props) {
 			flex: 1,
 		},
 	});
+
 	return (
 		<>
 			{modalStates.visible && (
@@ -137,8 +159,8 @@ function HomeScreenApp(props) {
 					options={modalOptions}
 				/>
 			)}
-			<Header text="Clock'n'roll" />
 			<View style={styles.container}>
+				<Header text="Clock'n'roll" />
 				{/* {renderingScreens.profile ? (
 					screens.profile
 				) : renderingScreens.history ? (
@@ -152,7 +174,9 @@ function HomeScreenApp(props) {
 				) : (
 					<Text>Nothin' here :3</Text>
 				)} */}
-				<Tab.Navigator initialRouteName="Home" tabBar={(tabProps) => <Footer {...tabProps} />}>
+				<Tab.Navigator
+					initialRouteName="Home"
+					tabBar={(tabProps) => <Footer {...tabProps} />}>
 					<Tab.Screen name="Profile" options={{ headerShown: false }}>
 						{() => screens.profile}
 					</Tab.Screen>
@@ -199,6 +223,17 @@ function HomeScreenApp(props) {
 						}}
 					/> */}
 				</Tab.Navigator>
+			{foregroundOptions.active && (
+				<View
+					style={{
+						position: "absolute",
+						backgroundColor: foregroundOptions.color,
+						width: "100%",
+						height: "100%",
+						zIndex: 99,
+					}}
+			>{foregroundOptions.child}</View>
+			)}
 			</View>
 		</>
 	);

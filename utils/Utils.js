@@ -14,12 +14,12 @@ function LengthOf(obj) {
   return Object.keys(obj).length;
 }
 
-function getIcon(name, type="I", color, size=24, style={}) {
+function getIcon(name, type="I", size=24, style={}) {
   var r_icon = null;
   if (type === "M") {
-    r_icon = <MCIcon name={name} color={color} size={size} style={style} />;
+    r_icon = <MCIcon name={name} color={style.color} size={size} style={style} />;
   } else {
-    r_icon = <Icon name={name} color={color} size={size} style={style} />
+    r_icon = <Icon name={name} color={style.color} size={size} style={style} />
   }
   return r_icon;
 }

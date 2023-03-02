@@ -38,7 +38,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import BigButton from "../../components/BigButton";
-import { JobSelectionScreen } from "../../components/JobSelection";
+import { JobCard, JobSelectionScreen } from "../../components/JobSelection";
 
 var d_width = Dimensions.get("window").width; //full width
 var d_height = Dimensions.get("window").height; //full height
@@ -55,11 +55,11 @@ function HomeScreen({ states, setStates, ...props }) {
 	}
 
 	useEffect(() => {
-		if (!states.firstSync)
-		{
-			setStates({...states, firstSync: true});
+		if (!states.firstSync) {
+			setStates({ ...states, firstSync: true });
+			onFirstSync();
 		}
-	}, [states])
+	}, [states]);
 
 	// button configs
 	const [stateNav, setStateNav] = useState(0);
@@ -68,20 +68,20 @@ function HomeScreen({ states, setStates, ...props }) {
 		spinCircleColor: "black",
 		spinCircleColor: "#D0D0D0",
 		style: { backgroundColor: "#D0D0D0" },
-		onFinish: () => handleBigButton(),
+		onFinish: () => handleBigButtonOnFinish(),
 	};
 	const secondBtn = {
 		text: "Press to clock in~",
-		spinCircleColor: "#707070",
+		// spinCircleColor: "#707070",
 		spinCircleColor: "#D0D0D0",
 		style: { backgroundColor: "#7CFF81" },
-		onFinish: () => handleBigButton(),
+		onFinish: () => handleBigButtonOnFinish(),
 	};
 	const thirdBtn = {
 		text: "Clock out now~!",
 		spinCircleColor: "#D0D0D0",
 		style: { backgroundColor: "#FF3939", color: "#FFFFFF" },
-		onFinish: () => handleBigButton(),
+		onFinish: () => handleBigButtonOnFinish(),
 	};
 	const bigbtn_1 = <BigButton {...firstBtn} />;
 	const bigbtn_2 = <BigButton {...secondBtn} />;
@@ -89,31 +89,53 @@ function HomeScreen({ states, setStates, ...props }) {
 	const [showBigButton, setShowBigButton] = useState(true);
 
 	const [mainComponent, setMainComponent] = useState(null);
-	async function handleBigButton() {
-		if (stateNav + 1 > 2) {
-			setStateNav(0);
-		} else {
-			setStateNav(stateNav + 1);
-		}
+	function handleBigButtonOnFinish() {
+		setStateNav(stateNav + 1);
 	}
 
 	function handleJobSelection(result) {
 		console.log(result);
 	}
 
+	const [selectedJob, setSelectedJob] = useState({});
 	useEffect(() => {
 		if (stateNav === 1) {
 			// selecting job
-			setMainComponent(<JobSelectionScreen callback={() => {
-				setShowBigButton(true);
-			}} {...props}/>);
+			setMainComponent(
+				<JobSelectionScreen
+					callback={(e) => {
+						setShowBigButton(true);
+						console.log(e.result.content);
+						setSelectedJob(e.result.content);
+					}}
+					{...props}
+				/>
+			);
 			setShowBigButton(false);
+		} else if (stateNav === 2) {
+			// clocking in
+			setMainComponent(
+				<View style={{ flex: 1, alignItems: "center" }}> 
+				<Text onPress={() => setShowBigButton(true)}>
+					Next
+				</Text>
+				<JobCard style={{marginBottom: 30}} jobObject={selectedJob} removerShown={false} descriptionMultiline={true} />
+				</View>
+			);
+			setShowBigButton(false);
+		} else if (stateNav === 3) {
+			// clocking out
+			setMainComponent(
+				<Text onPress={() => setShowBigButton(true)}>Next</Text>
+			);
+			setShowBigButton(false);
+			setStateNav(0);
 		}
 	}, [stateNav, states]);
 
 	useEffect(() => {
 		// console.log(showBigButton);
-	}, [showBigButton])
+	}, [showBigButton]);
 
 	// user configs
 	const [displayName, setDisplayName] = useState(user.displayName);
@@ -128,7 +150,7 @@ function HomeScreen({ states, setStates, ...props }) {
 		});
 	}
 
-	async function handleWriteData() {
+	async function onFirstSync() {
 		const [r, err] = await usePromise(
 			update(ref(db, "users/" + user.uid), {
 				username: user.displayName,
@@ -137,12 +159,6 @@ function HomeScreen({ states, setStates, ...props }) {
 				last_login: new Date().toLocaleString(),
 			})
 		);
-
-		if (err) {
-			alert(err.message);
-		} else {
-			alert("success!");
-		}
 	}
 
 	return (
@@ -154,7 +170,13 @@ function HomeScreen({ states, setStates, ...props }) {
 				paddingBottom: 24,
 				height: "100%",
 			}}>
-			{showBigButton ? stateNav === 0 ? bigbtn_1 : stateNav === 1 ? bigbtn_2 : bigbtn_3 : mainComponent}
+			{showBigButton
+				? stateNav === 0
+					? bigbtn_1
+					: stateNav === 1
+					? bigbtn_2
+					: bigbtn_3
+				: mainComponent}
 			{/* <BottomTabs /> */}
 		</View>
 	);

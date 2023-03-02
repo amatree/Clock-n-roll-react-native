@@ -34,35 +34,12 @@ var d_height = Dimensions.get("window").height; //full height
 export default function App() {
 	const [fontsLoaded] = useFonts({
 		Maitree: require("./assets/fonts/Maitree/Maitree-Regular.ttf"),
+		MaitreeMedium: require("./assets/fonts/Maitree/Maitree-Medium.ttf"),
 		MaitreeSemiBold: require("./assets/fonts/Maitree/Maitree-SemiBold.ttf"),
 		MaitreeBold: require("./assets/fonts/Maitree/Maitree-Bold.ttf"),
 	});
 
-	// const [modalVisible, setModalVisible] = useState(false);
-	// const [modalMessage, setModalMessage] = useState("eee");
-	// const [modalSettings, setModalSettings] = useState({});
-	// const ModalComponent = () => {
-	// 	return (
-	// 		<PopupModal
-	// 			message={modalMessage}
-	// 			modalVisible={modalVisible}
-	// 			setModalVisible={setModalVisible}
-	// 			{...modalSettings}
-	// 		/>
-	// 	);
-	// };
-
-	// async function showModal( message, callback = () => {}, settings = {} ) {
-	// 	setModalSettings({
-	// 		...settings,
-	// 		afterClose: callback,
-	// 	});
-	// 	setModalMessage(message);
-	// 	setModalVisible(true);
-	// }
-
 	const childProps = {
-		// showAlert: showModal,
 	};
 
 	function StackNavigation() {

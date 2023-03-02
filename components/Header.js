@@ -7,6 +7,7 @@ function Header ( {text, style, ...props} ) {
 
 	const styles = StyleSheet.create({
 		header: {
+			zIndex: 0,
 			backgroundColor: "white",
 			height: 128,
 			display: "flex",
