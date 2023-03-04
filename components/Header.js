@@ -63,7 +63,7 @@ function Header({
 			fontFamily: "MaitreeSemiBold",
 			fontSize: 20,
 			letterSpacing: 0.5,
-			color: "purple",
+			color: "#123272",
 		},
 	});
 
@@ -78,14 +78,13 @@ function Header({
 
 	useEffect(() => {
 		ToggleHeader(props._showHeader);
-		console.log(props._showHeader);
 	}, [props._showHeader])
 
 	function ToggleHeader(shown = true) {
 		if (shown) {
-			headerTranslateY.value = -200;
-		} else {
 			headerTranslateY.value = 0;
+		} else {
+			headerTranslateY.value = -130;
 		}
 	}
 

@@ -51,7 +51,7 @@ import { useFocusEffect, useNavigationState } from "@react-navigation/native";
 import { JobCreateForm } from "../../components/JobCreateForm";
 
 const Stack = createStackNavigator();
-const JobCreateScreenSteps = [
+export const JobCreateScreenSteps = [
 	"JobMain",
 	"AddJobStep1",
 	"AddJobStep2",
@@ -73,9 +73,9 @@ function AllJobsScreen(props) {
 		});
 	}
 
-	function beforeLoadingStackScreen(navProps = props) {
+	function beforeLoadingStackScreen(navProps = props, i) {
 		props.setOnHeaderBack({
-			shown: navProps.navigation.canGoBack(),
+			shown: i != 0 && navProps.navigation.canGoBack(),
 			callback: () => {
 				if (navProps.navigation.canGoBack()) {
 					navProps.navigation.goBack();
@@ -86,6 +86,9 @@ function AllJobsScreen(props) {
 	}
 
 	function mainScreen(navProps, props) {
+		useEffect(() => {
+			beforeLoadingStackScreen(props, 0);
+		}, []);
 		return (
 			<View style={styles.container}>
 				<TouchableOpacity
@@ -124,12 +127,14 @@ function AllJobsScreen(props) {
 	function addJobStep1(navProps, props) {
 		useEffect(() => {
 			setCurrNavName(JobCreateScreenSteps[1]);
-			beforeLoadingStackScreen(navProps);
+			beforeLoadingStackScreen(navProps, 1);
 		}, []);
 
 		return (
 			<>
-				<JobCreateForm {...props} />
+				<JobCreateForm onNextStep={() => {
+					navProps.navigation.navigate(JobCreateScreenSteps[2]);
+				}} {...props} />
 			</>
 		);
 	}
@@ -137,7 +142,7 @@ function AllJobsScreen(props) {
 	function addJobStep2(navProps, props) {
 		useEffect(() => {
 			setCurrNavName(JobCreateScreenSteps[2]);
-			beforeLoadingStackScreen(navProps);
+			beforeLoadingStackScreen(navProps, 2);
 		}, []);
 
 		return (
@@ -150,7 +155,7 @@ function AllJobsScreen(props) {
 	function addJobStep3(navProps, props) {
 		useEffect(() => {
 			setCurrNavName(JobCreateScreenSteps[3]);
-			beforeLoadingStackScreen(navProps);
+			beforeLoadingStackScreen(navProps, 3);
 		}, []);
 
 		return (

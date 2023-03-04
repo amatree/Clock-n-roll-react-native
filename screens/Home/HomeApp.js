@@ -65,10 +65,6 @@ function HomeScreenApp(props) {
 		});
 	}
 
-	useEffect(() => {
-		console.log("sthing changd");
-	}, [onHeaderBack]);
-
 	const [onHeaderBack, setOnHeaderBack] = useState({
 		shown: false,
 		callback: () => {},
@@ -167,8 +163,7 @@ function HomeScreenApp(props) {
 	});
 
 	useEffect(() => {
-		// setShowFooter(!showFooter);
-		setShowHeader(!showHeader);
+		
 	}, []);
 
 	return (
