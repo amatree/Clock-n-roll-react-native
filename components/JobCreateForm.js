@@ -24,7 +24,7 @@ import Animated, {
 	cancelAnimation,
 } from "react-native-reanimated";
 import { ScrollView } from "react-native-gesture-handler";
-import { getIcon } from "../utils/Utils";
+import { AttachWagePerHour, TrimForNumber, getIcon } from "../utils/Utils";
 
 function JobCreateForm({ onNextStep = () => {}, ...props }) {
 	const [jobObject, setJobObject] = useState({
@@ -43,11 +43,14 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 					<TextInput
 						style={{ ...styles.input }}
 						placeholder="Software Engineer"
-						onSubmitEditing={(text) =>
+						onSubmitEditing={(e) => {
+							// setJobObject({ ...jobObject, title: e.nativeEvent.text })
+						}}
+						onChangeText={(text) => {
 							setJobObject({ ...jobObject, title: text })
-						}
+						}}
 					/>
-					<Text style={[styles.textFont, styles.inputFieldLabel, {}]}>
+					<Text style={[styles.textFont, styles.inputFieldLabel, { }]}>
 						Job Title
 					</Text>
 				</View>
@@ -63,7 +66,7 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 						pattern="[0-9]*"
 						defaultValue={jobWageTextInput}
 						onBlur={(e) => {
-							const text = e.nativeEvent.text;
+							const text = e.nativeEvent.text.trim();
 							if (
 								text &&
 								!(
@@ -72,11 +75,11 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 									text.includes("hr")
 								)
 							) {
-								setJobWageTextInput("$" + text + "/hr");
+								setJobWageTextInput(AttachWagePerHour(text));
 							}
 						}}
 						onFocus={(e) => {
-							const text = e.nativeEvent.text;
+							const text = e.nativeEvent.text.trim();
 							setJobWageTextInput(undefined);
 							if (
 								text &&
@@ -84,11 +87,15 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 									text.includes("/") ||
 									text.includes("hr"))
 							) {
-								setJobWageTextInput(text.toString().replace(/[$/hr]|/g, ""));
+								setJobWageTextInput(TrimForNumber(text));
 							}
 						}}
-						onSubmitEditing={(text) => {
-							const wph = text.toString().replace(/[$/hr]|/g, "");
+						onSubmitEditing={(e) => {
+							const wph = TrimForNumber(e.nativeEvent.text);
+							setJobObject({ ...jobObject, wage: wph });
+						}}
+						onChangeText={(text) => {
+							const wph = TrimForNumber(text);
 							setJobObject({ ...jobObject, wage: wph });
 						}}
 					/>
@@ -113,9 +120,12 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 						placeholder="Develop systems and software that allow users to perform specific tasks on computers or other devices."
 						multiline={true}
 						autoComplete={false}
-						onSubmitEditing={(text) =>
-							setJobObject({ ...jobObject, description: text })
+						onSubmitEditing={(e) =>
+							setJobObject({ ...jobObject, description: e.nativeEvent.text })
 						}
+						onChangeText={(text) => {
+							setJobObject({ ...jobObject, description: text })
+						}}
 					/>
 					<Text style={[styles.textFont, styles.inputFieldLabel, { top: 25 }]}>
 						Job Description (Optional)
@@ -141,7 +151,7 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
           elevation: 2,
 				}}
 				onPress={() => {
-					onNextStep();
+					onNextStep(jobObject);
 				}}>
 				<Text
 					style={[

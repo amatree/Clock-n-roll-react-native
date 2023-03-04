@@ -73,13 +73,21 @@ function AllJobsScreen(props) {
 		});
 	}
 
-	function beforeLoadingStackScreen(navProps = props, i) {
+	function beforeLoadingStackScreen(navProps, i) {
+		if (navProps === undefined) {	
+			resetHeader();
+			return;
+		}
 		props.setOnHeaderBack({
-			shown: i != 0 && navProps.navigation.canGoBack(),
+			shown: i != 0,
 			callback: () => {
-				if (navProps.navigation.canGoBack()) {
-					navProps.navigation.goBack();
+				const iScreen = i - 1;
+				if (!navProps.navigation.canGoBack() || iScreen <= 0) {
 					resetHeader();
+				}
+				if (navProps.navigation.canGoBack()) {
+					beforeLoadingStackScreen(navProps, iScreen);
+					navProps.navigation.goBack();
 				}
 			},
 		});
@@ -87,7 +95,7 @@ function AllJobsScreen(props) {
 
 	function mainScreen(navProps, props) {
 		useEffect(() => {
-			beforeLoadingStackScreen(props, 0);
+			beforeLoadingStackScreen(undefined, 0);
 		}, []);
 		return (
 			<View style={styles.container}>
@@ -132,7 +140,8 @@ function AllJobsScreen(props) {
 
 		return (
 			<>
-				<JobCreateForm onNextStep={() => {
+				<JobCreateForm onNextStep={(jobObject) => {
+					console.log("got:", jobObject);
 					navProps.navigation.navigate(JobCreateScreenSteps[2]);
 				}} {...props} />
 			</>

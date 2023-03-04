@@ -5,6 +5,14 @@ function IsFunctionEmpty(fn) {
   return fn.toString() === 0;
 }
 
+function TrimForNumber(str) {
+  return str.replace(/\D/g,'');
+}
+
+function AttachWagePerHour(str) {
+  return "$" + TrimForNumber(str) + "/hr";
+}
+
 function Capitalize(str)
 {
     return str && str[0].toUpperCase() + str.slice(1);
@@ -29,4 +37,6 @@ export {
   Capitalize,
   LengthOf,
   getIcon,
+  TrimForNumber,
+  AttachWagePerHour,
 }
