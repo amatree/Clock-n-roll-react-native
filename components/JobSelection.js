@@ -102,7 +102,7 @@ function JobSelectionScreen({
 	}
 
 	useEffect(() => {
-		GenerateJobArray();
+		if (props.generateDummyJobs) GenerateJobArray();
 	}, []);
 
 	// child for popup modal
@@ -143,7 +143,7 @@ function JobSelectionScreen({
 	}
 
 	return (
-		<View style={[styles.container]}>
+		<View style={[styles.container, props.style]}>
 			<Animated.View style={[styles.searchContainer, jobSearchInputScaleStyle]}>
 				<Animated.View style={[jobSearchIconPaddingStyle]}>
 					{getIcon("search-outline", undefined, 20)}

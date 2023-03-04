@@ -15,6 +15,7 @@ import { Footer } from "../../components/Footer";
 
 import { useState, useEffect, useMemo } from "react";
 import { PopupModal } from "../../components/PopupModal";
+import { AllJobsScreen } from "./AllJobsScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -53,8 +54,9 @@ function HomeScreenApp(props) {
 		child: <></>,
 	});
 
-	function ToggleForeground({opacity = 0.7, child = <></>}) {
-		const transparency = "#000000" + Math.floor((1 - Math.min(opacity, 1)) * 255).toString(16);
+	function ToggleForeground({ opacity = 0.7, child = <></> }) {
+		const transparency =
+			"#000000" + Math.floor((1 - Math.min(opacity, 1)) * 255).toString(16);
 		setForegroundOptions({
 			...foregroundOptions,
 			active: !foregroundOptions.active,
@@ -64,13 +66,28 @@ function HomeScreenApp(props) {
 	}
 
 	useEffect(() => {
+		console.log("sthing changd");
+	}, [onHeaderBack]);
 
-	}, [])
+	const [onHeaderBack, setOnHeaderBack] = useState({
+		shown: false,
+		callback: () => {},
+	});
+
+	// footer props
+	const [showFooter, setShowFooter] = useState(true);
+	const [showHeader, setShowHeader] = useState(true);
 
 	// child props
 	const childProps = {
 		ShowAlert: ShowAlert,
 		ToggleForeground: ToggleForeground,
+		onHeaderBack: onHeaderBack,
+		showHeader: setShowHeader,
+		_showHeader: showHeader,
+		setOnHeaderBack: setOnHeaderBack,
+		showFooter: setShowFooter,
+		_showFooter: showFooter,
 	};
 
 	// screens setup
@@ -100,7 +117,7 @@ function HomeScreenApp(props) {
 			/>
 		),
 		history: (
-			<HistoryScreen
+			<TodoScreen
 				states={historyScreenStates}
 				setStates={setHistoryScreenStates}
 				{...childProps}
@@ -116,7 +133,7 @@ function HomeScreenApp(props) {
 			/>
 		),
 		export: (
-			<TodoScreen
+			<AllJobsScreen
 				states={exportScreenStates}
 				setStates={setExportScreenStates}
 				{...childProps}
@@ -149,6 +166,11 @@ function HomeScreenApp(props) {
 		},
 	});
 
+	useEffect(() => {
+		// setShowFooter(!showFooter);
+		setShowHeader(!showHeader);
+	}, []);
+
 	return (
 		<>
 			{modalStates.visible && (
@@ -160,7 +182,13 @@ function HomeScreenApp(props) {
 				/>
 			)}
 			<View style={styles.container}>
-				<Header text="Clock'n'roll" />
+				<Header
+					text="Clock'n'roll"
+					onBackButtonPress={() => {}}
+					backButtonShown={onHeaderBack.shown}
+					{...props}
+					{...childProps}
+				/>
 				{/* {renderingScreens.profile ? (
 					screens.profile
 				) : renderingScreens.history ? (
@@ -176,7 +204,7 @@ function HomeScreenApp(props) {
 				)} */}
 				<Tab.Navigator
 					initialRouteName="Home"
-					tabBar={(tabProps) => <Footer {...tabProps} />}>
+					tabBar={(tabProps) => <Footer {...tabProps} {...childProps} {...props} />}>
 					<Tab.Screen name="Profile" options={{ headerShown: false }}>
 						{() => screens.profile}
 					</Tab.Screen>
@@ -223,17 +251,18 @@ function HomeScreenApp(props) {
 						}}
 					/> */}
 				</Tab.Navigator>
-			{foregroundOptions.active && (
-				<View
-					style={{
-						position: "absolute",
-						backgroundColor: foregroundOptions.color,
-						width: "100%",
-						height: "100%",
-						zIndex: 99,
-					}}
-			>{foregroundOptions.child}</View>
-			)}
+				{foregroundOptions.active && (
+					<View
+						style={{
+							position: "absolute",
+							backgroundColor: foregroundOptions.color,
+							width: "100%",
+							height: "100%",
+							zIndex: 99,
+						}}>
+						{foregroundOptions.child}
+					</View>
+				)}
 			</View>
 		</>
 	);

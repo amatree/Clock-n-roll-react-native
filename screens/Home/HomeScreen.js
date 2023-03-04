@@ -103,6 +103,7 @@ function HomeScreen({ states, setStates, ...props }) {
 			// selecting job
 			setMainComponent(
 				<JobSelectionScreen
+					generateDummyJobs={true}
 					callback={(e) => {
 						setShowBigButton(true);
 						console.log(e.result.content);

@@ -28,8 +28,8 @@ const APP_TEST = false;
 
 const Stack = createStackNavigator();
 
-var d_width = Dimensions.get("window").width; //full width
-var d_height = Dimensions.get("window").height; //full height
+export const DEVICE_WIDTH = Dimensions.get("window").width; //full width
+export const DEVICE_HEIGHT = Dimensions.get("window").height; //full height
 
 export default function App() {
 	const [fontsLoaded] = useFonts({
@@ -93,8 +93,8 @@ const styles = StyleSheet.create({
 	container: {
 		height: "100%",
 		overflow: "hidden",
-		width: d_width,
-		margin: 0,
+		width: DEVICE_WIDTH,
+		DEVICE_HEIGHT: 0,
 		padding: 0,
 	},
 });

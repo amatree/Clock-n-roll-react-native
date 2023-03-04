@@ -4,7 +4,29 @@ import {default as MCIcon} from 'react-native-vector-icons/MaterialCommunityIcon
 import Icon from "react-native-vector-icons/Ionicons";
 import { Capitalize } from '../utils/Utils';
 
+import Animated, {
+	useSharedValue,
+	withTiming,
+	useAnimatedStyle,
+	Easing,
+	withRepeat,
+	withSpring,
+	interpolate,
+	withSequence,
+	EasingNode,
+	cancelAnimation,
+} from "react-native-reanimated";
+
 function Footer( {setScreens = undefined, ...props} ) {
+	const footerTranslateY = useSharedValue(0);
+	const footerTranslateYStyle = useAnimatedStyle(() => {
+		return {
+			transform: [
+				{ translateY: withSpring(footerTranslateY.value, { duration: 100 })}
+			]
+		}
+	});
+
 	const [selections, setSelections] = useState({
 		"profile": false,
 		"history": false,
@@ -77,14 +99,26 @@ function Footer( {setScreens = undefined, ...props} ) {
 		setSelection("settings");
 	}
 
+	useEffect(() => {
+		ToggleFooter(props._showFooter);
+	}, [props._showFooter])
+
+	function ToggleFooter(shown = true) {
+		if (shown) {
+			footerTranslateY.value = 0;
+		} else {
+			footerTranslateY.value = 100;
+		}
+	}
+
 	return (
-		<View style={styles.footer}>
+		<Animated.View style={[styles.footer, footerTranslateYStyle]}>
 			<FooterTab isSelected={selections.profile} tabIcon="person-outline" onPress={() => handleProfileBtn()} style={{paddingLeft: 12}} />
 			<FooterTab isSelected={selections.history} tabIcon="history" iconType={"M"} onPress={() => handleHistoryBtn()} style={{paddingRight: 12}} />
 			<FooterTab isSelected={selections.home} mainTab={true} tabIcon="home-outline" onPress={() => handleHomeBtn()} />
 			<FooterTab isSelected={selections.export} tabIcon="database-export-outline" iconType={"M"} onPress={() => handleExportBtn()} style={{paddingLeft: 12}} />
 			<FooterTab isSelected={selections.settings} tabIcon="settings-outline" iconType={""} onPress={() => handleSettingsBtn()} style={{paddingRight: 12}} />
-		</View>
+		</Animated.View>
 	);
 }
 
