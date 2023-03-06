@@ -24,7 +24,7 @@ import Animated, {
 	cancelAnimation,
 } from "react-native-reanimated";
 import { ScrollView } from "react-native-gesture-handler";
-import { AttachWagePerHour, TrimForNumber, getIcon } from "../utils/Utils";
+import { AttachWagePerHour, ObjectHasEmptyValue, TrimForNumber, getIcon } from "../utils/Utils";
 
 function JobCreateForm({ onNextStep = () => {}, ...props }) {
 	const [jobObject, setJobObject] = useState({
@@ -34,6 +34,22 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 	});
 	const [jobWageTextInput, setJobWageTextInput] = useState(undefined);
 
+	const [inputFieldFocus, setInputFieldFocus] = useState({
+		title: false,
+		description: false,
+		wage: false,
+	})
+
+	function handleNextStep() {
+		if (ObjectHasEmptyValue(jobObject)) {
+			props.ShowAlert("Please make sure to fill out every input!", {
+				type: "c",
+			});
+			return;
+		}
+		onNextStep(jobObject);
+	}
+
 	return (
 		<View style={[styles.container, { backgroundColor: "" }]}>
 			<Text style={[styles.title, {}]}>Create a Job</Text>
@@ -41,8 +57,15 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 				{/* Job title input */}
 				<View style={styles.inputContainer}>
 					<TextInput
-						style={{ ...styles.input }}
+						style={[styles.input, {borderBottomWidth: inputFieldFocus.title && 1}]}
 						placeholder="Software Engineer"
+						returnKeyType="next"
+						onFocus={() => {
+							setInputFieldFocus({...inputFieldFocus, title: true});
+						}}
+						onBlur={() => {
+							setInputFieldFocus({...inputFieldFocus, title: false});
+						}}
 						onSubmitEditing={(e) => {
 							// setJobObject({ ...jobObject, title: e.nativeEvent.text })
 						}}
@@ -58,14 +81,16 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 				{/* Wage input */}
 				<View style={styles.inputContainer}>
 					<TextInput
-						style={{ ...styles.input }}
+						style={[styles.input, {borderBottomWidth: inputFieldFocus.wage && 1} ]}
 						placeholder="$16/hr"
 						maxLength={7}
 						keyboardType="numeric"
 						inputMode="numeric"
 						pattern="[0-9]*"
+						returnKeyType="next"
 						defaultValue={jobWageTextInput}
 						onBlur={(e) => {
+							setInputFieldFocus({...inputFieldFocus, wage: false});
 							const text = e.nativeEvent.text.trim();
 							if (
 								text &&
@@ -79,6 +104,7 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 							}
 						}}
 						onFocus={(e) => {
+							setInputFieldFocus({...inputFieldFocus, wage: true});
 							const text = e.nativeEvent.text.trim();
 							setJobWageTextInput(undefined);
 							if (
@@ -115,8 +141,12 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 								paddingTop: 55,
 								paddingBottom: 20,
 								minHeight: 150,
+								maxHeight: 300,
+								overflow: "hidden",
+								borderBottomWidth: inputFieldFocus.description && 1,
 							},
 						]}
+						returnKeyType="next"
 						placeholder="Develop systems and software that allow users to perform specific tasks on computers or other devices."
 						multiline={true}
 						autoComplete={false}
@@ -125,6 +155,12 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 						}
 						onChangeText={(text) => {
 							setJobObject({ ...jobObject, description: text })
+						}}
+						onFocus={() => {
+							setInputFieldFocus({...inputFieldFocus, description: true});
+						}}
+						onBlur={() => {
+							setInputFieldFocus({...inputFieldFocus, description: false});
 						}}
 					/>
 					<Text style={[styles.textFont, styles.inputFieldLabel, { top: 25 }]}>
@@ -151,7 +187,7 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
           elevation: 2,
 				}}
 				onPress={() => {
-					onNextStep(jobObject);
+					handleNextStep();
 				}}>
 				<Text
 					style={[
@@ -196,6 +232,7 @@ const styles = StyleSheet.create({
 		overflow: "scroll",
 		textAlign: "right",
 		fontSize: 16,
+		borderColor: "#123272",
 	},
 	textFont: {
 		fontFamily: "Maitree",

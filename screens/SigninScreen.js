@@ -132,7 +132,7 @@ const SigninScreen = ( props ) => {
 			}, Math.random() * 500);
 		} else {
 			console.log(error)
-			props.showAlert(error.message);
+			props.topShowAlert(error.message);
 			toggleLogin();
 		}
 	}
@@ -146,24 +146,24 @@ const SigninScreen = ( props ) => {
 	function handleForgotPassword() {
 		setUsername("Test@gmail.com");
 		setPassword("12345678");
-		// props.showAlert("currently implementing :3");
+		// props.topShowAlert("currently implementing :3");
 	}
 
 	function handleAuthFaceID() {
-		props.showAlert("FaceIDing...");
+		props.topShowAlert("FaceIDing...");
 	}
 
 	function handleAuthGithub() {
-		props.showAlert("Github");
+		props.topShowAlert("Github");
 	}
 	
 	function handleAuthGoogle() {
-		props.showAlert("googleee");
+		props.topShowAlert("googleee");
 	}
 
 	function toggleLogin() {
 		if (!username || !password) {
-			props.showAlert("Make sure to fill out all fields!");
+			props.topShowAlert("Make sure to fill out all fields!");
 			return;
 		}
 		zoomScaleX.value = zoomScaleX.value === 0 ? 1 : 0;

@@ -26,7 +26,7 @@ function HomeScreenApp(props) {
 		message: "",
 	});
 	const [modalOptions, setModalOptions] = useState({
-		type: "ync",
+		type: "c",
 		child: undefined,
 		onClose: () => {},
 		onYes: () => {},

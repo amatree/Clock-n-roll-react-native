@@ -10,7 +10,7 @@ import {
 	Button,
 	Modal,
 } from "react-native";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Animated, {
 	useSharedValue,
 	withTiming,
@@ -23,11 +23,13 @@ import Animated, {
 	EasingNode,
 	cancelAnimation,
 } from "react-native-reanimated";
-import { ScrollView } from "react-native-gesture-handler";
+import { RefreshControl, ScrollView } from "react-native-gesture-handler";
 import { getIcon } from "../utils/Utils";
 
 function JobSelectionScreen({
+	jobData = {},
 	callback = (jobSelectionEvent) => {},
+	onRefresh = () => {},
 	...props
 }) {
 	const jobSearchAnimConfig = { duration: 1000 };
@@ -50,7 +52,10 @@ function JobSelectionScreen({
 	});
 
 	// jobs fetch
-	const [allJobs, setAllJobs] = useState({});
+	const [allJobs, setAllJobs] = useState(jobData);
+	useEffect(() => {
+		setAllJobs(jobData);
+	}, [jobData]);
 
 	function GenerateCallbackEvent({ message, jobID }) {
 		var result = {};
@@ -105,39 +110,66 @@ function JobSelectionScreen({
 		if (props.generateDummyJobs) GenerateJobArray();
 	}, []);
 
+	useEffect(() => {
+		// console.log(allJobs);
+	}, [allJobs]);
+
+	const [refreshing, setRefreshing] = useState(false);
+
+	const handleOnRefresh = useCallback(() => {
+		onRefresh();
+		setRefreshing(true);
+		setTimeout(() => {
+			setRefreshing(false);
+		}, 2000);
+	}, []);
+
 	// child for popup modal
 	function JobCards({ ...props }) {
 		const JobCardHeight = 100;
 		return (
 			<ScrollView
+				refreshControl={
+					<RefreshControl refreshing={refreshing} onRefresh={handleOnRefresh} />
+				}
 				style={styles.jobs}
 				snapToAlignment="center"
 				snapToInterval={JobCardHeight}
 				decelerationRate={0}
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}>
-				{Object.entries(allJobs).map((jobObj, idx) => {
-					const id = jobObj[0];
-					const job = jobObj[1];
+				{refreshing ? (
+					<Text style={{ textAlign: "center", fontSize: 12, fontFamily: "Maitree" }}>
+						Refreshing...
+					</Text>
+				) : Object.keys(allJobs).length > 0 ? (
+					Object.entries(allJobs).map((jobObj, idx) => {
+						const id = jobObj[0];
+						const job = jobObj[1];
 
-					return (
-						<JobCard
-							title={job.title ? job.title : "No title given."}
-							shortDescription={
-								job.description ? job.description : "No description given."
-							}
-							onPress={() => {
-								callback(
-									GenerateCallbackEvent({
-										message: "job selected",
-										jobID: id,
-									})
-								);
-							}}
-							key={idx}
-						/>
-					);
-				})}
+						return (
+							<JobCard
+								title={job.title ? job.title : "No title given."}
+								shortDescription={
+									job.description ? job.description : "No description given."
+								}
+								onPress={() => {
+									callback(
+										GenerateCallbackEvent({
+											message: "job selected",
+											jobID: id,
+										})
+									);
+								}}
+								key={idx}
+							/>
+						);
+					})
+				) : (
+					<Text style={[styles.text, { textAlign: "center" }]}>
+						No job found!
+					</Text>
+				)}
 			</ScrollView>
 		);
 	}
@@ -191,7 +223,9 @@ function JobCard({
 			}}>
 			<View style={[styles.jobCard, props.style]}>
 				<View style={styles.jobCardHeader}>
-					<Text style={styles.text} numberOfLines={titleMultiline ? undefined : 1}>
+					<Text
+						style={styles.text}
+						numberOfLines={titleMultiline ? undefined : 1}>
 						{jobTitle}
 					</Text>
 					<TouchableOpacity
@@ -201,7 +235,9 @@ function JobCard({
 						{removerShown && getIcon("trash-outline")}
 					</TouchableOpacity>
 				</View>
-				<Text style={styles.descriptionText} numberOfLines={descriptionMultiline ? undefined : 1}>
+				<Text
+					style={styles.descriptionText}
+					numberOfLines={descriptionMultiline ? undefined : 1}>
 					{jobDesc}
 				</Text>
 			</View>

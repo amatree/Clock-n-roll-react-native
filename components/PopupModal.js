@@ -25,6 +25,7 @@ import Animated, {
 	EasingNode,
 	cancelAnimation,
 } from "react-native-reanimated";
+import { ScrollView } from "react-native-gesture-handler";
 
 // ===========================================================
 // const setup:
@@ -34,7 +35,7 @@ import Animated, {
 // 	message: "",
 // });
 // const [modalOptions, setModalOptions] = useState({
-// 	type: "ync",
+// 	type: "c",
 // 	child: undefined,
 // 	onClose: () => {},
 // 	onYes: () => {},
@@ -98,6 +99,8 @@ function PopupModal({
 	if (!PopupModalTypes.includes(typeSel)) {
 		typeSel = PopupModalTypes[0];
 	}
+	// console.log(typeSel);
+
 	const [modalVisible, setModalVisible] = useState(visible);
 
 	if (options.child !== undefined && options.child.props.children !== 0) {
@@ -108,7 +111,7 @@ function PopupModal({
 		<Modal
 			animationType={props.animationType || "none"}
 			transparent={true}
-			visible={visible}
+			visible={modalVisible}
 			onRequestClose={() => {
 				setModalVisible(!visible);
 				if (states) {
@@ -181,6 +184,8 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.35,
 		shadowRadius: 4,
 		elevation: 5,
+		minWidth: "70%",
+		maxHeight: "75%",
 	},
 	modalText: {
 		fontSize: 18,
@@ -204,6 +209,7 @@ function GetButtonComps({
 		default: {
 			...props.style,
 			flexDirection: "row",
+			justifyContent: "flex-end",
 			alignSelf: "flex-end",
 		},
 		button: {
@@ -248,7 +254,7 @@ function GetButtonComps({
 						defaultCallback();
 						onOk();
 					}}>
-					<Text style={styles.textStyle}>Ok</Text>
+						<Text style={styles.textStyle}>Ok</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
 					style={[styles.button, styles.buttonNormal]}
@@ -256,7 +262,7 @@ function GetButtonComps({
 						defaultCallback();
 						onCancel();
 					}}>
-					<Text style={styles.textStyle}>Cancel</Text>
+						<Text style={styles.textStyle}>Cancel</Text>
 				</TouchableOpacity>
 			</View>
 		);
@@ -269,7 +275,7 @@ function GetButtonComps({
 						defaultCallback();
 						onYes();
 					}}>
-					<Text style={styles.textStyle}>Yes</Text>
+						<Text style={styles.textStyle}>Yes</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
 					style={[styles.button, styles.buttonNormal]}
@@ -277,7 +283,7 @@ function GetButtonComps({
 						defaultCallback();
 						onNo();
 					}}>
-					<Text style={styles.textStyle}>No</Text>
+						<Text style={styles.textStyle}>No</Text>
 				</TouchableOpacity>
 			</View>
 		);
@@ -290,7 +296,7 @@ function GetButtonComps({
 						defaultCallback();
 						onYes();
 					}}>
-					<Text style={styles.textStyle}>Yes</Text>
+						<Text style={styles.textStyle}>Yes</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
 					style={[styles.button, styles.buttonNormal]}
@@ -298,7 +304,7 @@ function GetButtonComps({
 						defaultCallback();
 						onNo();
 					}}>
-					<Text style={styles.textStyle}>No</Text>
+						<Text style={styles.textStyle}>No</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
 					style={[styles.button, styles.buttonNormal]}
@@ -306,7 +312,7 @@ function GetButtonComps({
 						defaultCallback();
 						onCancel();
 					}}>
-					<Text style={styles.textStyle}>Cancel</Text>
+						<Text style={styles.textStyle}>Cancel</Text>
 				</TouchableOpacity>
 			</View>
 		);
@@ -319,7 +325,7 @@ function GetButtonComps({
 						defaultCallback();
 						onYes();
 					}}>
-					<Text style={styles.textStyle}>Yes</Text>
+						<Text style={styles.textStyle}>Yes</Text>
 				</TouchableOpacity>
 			</View>
 		);
@@ -333,7 +339,9 @@ function GetButtonComps({
 					defaultCallback();
 					onClose();
 				}}>
-				<Text style={styles.textStyle}>Close</Text>
+				<ScrollView>
+					<Text style={styles.textStyle}>Close</Text>
+				</ScrollView>
 			</TouchableOpacity>
 		</View>
 	);

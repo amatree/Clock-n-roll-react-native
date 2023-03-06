@@ -40,8 +40,6 @@ function TodoScreen({ states, setStates, ...props }) {
 	const [taskItems, setTaskItems] = useState({});
 	const [hasUnsavedChange, setHasUnsavedChange] = useState(false);
 
-	const [firstSync, setFirstSync] = useState(states.firstSync);
-
 	function saveToTaskItems(tasks) {
 		setTaskItems(tasks);
 		setStates({

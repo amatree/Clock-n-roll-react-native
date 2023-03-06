@@ -39,7 +39,36 @@ export default function App() {
 		MaitreeBold: require("./assets/fonts/Maitree/Maitree-Bold.ttf"),
 	});
 
+	// modal setup
+	const [modalStates, setModalStates] = useState({
+		visible: false,
+		message: "",
+	});
+	const [modalOptions, setModalOptions] = useState({
+		type: "c",
+		child: undefined,
+		onClose: () => {},
+		onYes: () => {},
+		onNo: () => {},
+		onCancel: () => {},
+		onOk: () => {},
+		afterClose: () => {},
+	});
+
+	function ShowAlert(message, options = modalOptions) {
+		setModalOptions({
+			...modalOptions,
+			...options,
+		});
+		setModalStates({
+			...modalStates,
+			message: message,
+			visible: true,
+		});
+	}
+
 	const childProps = {
+		topShowAlert: ShowAlert,
 	};
 
 	function StackNavigation() {
@@ -82,6 +111,14 @@ export default function App() {
 
 	return (
 		<>
+			{modalStates.visible && (
+				<PopupModal
+					visible={modalStates.visible}
+					message={modalStates.message}
+					states={setModalStates}
+					options={modalOptions}
+				/>
+			)}
 			<NavigationContainer>
 				<StackNavigation />
 			</NavigationContainer>

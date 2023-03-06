@@ -38,13 +38,13 @@ const SignupScreen = ( props ) => {
 	async function handleSubmit() {
 		const [user, error] = await usePromise(createUserWithEmailAndPassword(auth, username, password))
 		if (user) {
-			// alert("Account created successfully!");
+			// props.topShowAlert("Account created successfully!");
 			props.navigation.dispatch(
 				props.navigation.replace("Sign In", {successfulSignup: true, uid: user.uid})
 			);
 			} else {
 				console.log(error)
-				alert(error.message);
+				props.topShowAlert(error.message);
 			}
 	}
 
@@ -53,17 +53,17 @@ const SignupScreen = ( props ) => {
 	}
 	
 	function handleAuthGithub() {
-		alert("Github");
+		props.topShowAlert("Github");
 	}
 	
 	async function handleAuthGoogle() {
 		const result = await SignInWithProvider("google");
 		console.log(result);
-		alert("googleee");
+		props.topShowAlert("googleee");
 	}
 
 	function handleGetEmailCode() {
-		alert("Getting da code (wip)")
+		props.topShowAlert("Getting da code (wip)")
 	}
 
 	return (

@@ -5,8 +5,12 @@ function IsFunctionEmpty(fn) {
   return fn.toString() === 0;
 }
 
+function ObjectHasEmptyValue(obj) {
+  return Object.values(obj).includes("") && !Object.values(obj).includes(undefined) && !Object.values(obj).includes(null);
+}
+
 function TrimForNumber(str) {
-  return str.replace(/\D/g,'');
+  return str.replace(/[^\d.-]/g, '');
 }
 
 function AttachWagePerHour(str) {
@@ -39,4 +43,5 @@ export {
   getIcon,
   TrimForNumber,
   AttachWagePerHour,
+  ObjectHasEmptyValue,
 }

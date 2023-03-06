@@ -17,18 +17,18 @@ import React, {
 	useCallback,
 } from "react";
 import { StackActions } from "@react-navigation/routers";
+import { getAuth } from "firebase/auth";
 import {
-	getAuth,
-	updateProfile,
-	updateEmail,
-	updatePassword,
-	updatePhoneNumber,
-	verifyBeforeUpdateEmail,
-	RecaptchaVerifier,
-	PhoneAuthProvider,
-} from "firebase/auth";
+	getDatabase,
+	ref,
+	set,
+	remove,
+	child,
+	get,
+	update,
+	onValue,
+} from "firebase/database";
 import { usePromise } from "../../components/PromiseHandle";
-import { getDatabase, ref, set, update } from "firebase/database";
 
 import Animated, {
 	useSharedValue,
@@ -58,8 +58,87 @@ export const JobCreateScreenSteps = [
 	"AddJobStep3",
 ];
 
-function AllJobsScreen(props) {
+function AllJobsScreen({states, setStates, ...props}) {
 	// console.log(props);
+
+	const auth = getAuth();
+	const user = auth.currentUser;
+	const db = getDatabase();
+	const dbRef = ref(db);
+	const jobsRef = ref(db, "users/" + user.uid + "/jobs")
+
+	const [jobData, setJobData] = useState({});
+	const [hasUnsavedChange, setHasUnsavedChange] = useState(false);
+	const [shouldRefresh, setShouldRefresh] = useState(false);
+
+	async function handleWriteData() {
+		const [r, err] = await usePromise(
+			set(ref(db, "users/" + user.uid + "/jobs"), jobData)
+		);
+		if (err) {
+			alert(err.message);
+		} else {
+			console.log("[" + new Date().toLocaleString() + "] job data synced!");
+		}
+	}
+
+	function handleAddJobData(job) {
+		var allJobs = Object.keys(jobData);
+		var nextIdx = allJobs[allJobs.length - 1];
+		if (nextIdx === undefined) nextIdx = 0;
+		else nextIdx = Number(nextIdx.replace("Job", "")) + 1;
+		var newJobData = { ["Job" + nextIdx]: job };
+		setJobData({...jobData, ...newJobData});
+		setHasUnsavedChange(true);
+	}
+
+	// listen for db changes
+	// useEffect(() => {
+	// 	onValue(jobsRef, (snapshot) => {
+	// 		const data = snapshot.val();
+	// 		if (snapshot.exists()) setJobData(data);
+	// 	})
+	// }, [])
+
+	useEffect(() => {
+		if (!states.firstSync || shouldRefresh) {
+			get(child(dbRef, `users/${user.uid}/jobs`))
+				.then((snapshot) => {
+					if (snapshot.exists()) {
+						console.log(
+							"[" + new Date().toLocaleString() + "] retrieved job data from db"
+						);
+						setJobData(snapshot.val());
+					}
+				})
+				.catch((error) => {
+					console.error(error);
+				})
+				.finally(() => {
+					setStates({
+						...states,
+						firstSync: true,
+					});
+					setShouldRefresh(false);
+				});
+		}
+	}, [states.firstSync, shouldRefresh]);
+
+	useEffect(() => {
+		let timer = null;
+		if (hasUnsavedChange) {
+			setHasUnsavedChange(false);
+			handleWriteData();
+		}
+
+		return () => {
+			if (timer) {
+				clearTimeout(timer);
+				setHasUnsavedChange(false);
+			}
+		};
+	}, [hasUnsavedChange]);
+
 	function setCurrNavName(name = JobCreateScreenSteps[0]) {
 		if (name === JobCreateScreenSteps[0]) {
 			resetHeader();
@@ -99,6 +178,7 @@ function AllJobsScreen(props) {
 		}, []);
 		return (
 			<View style={styles.container}>
+				<View style={{flexDirection: "row"}}>
 				<TouchableOpacity
 					onPress={() => {
 						props.navigation.navigate(JobCreateScreenSteps[1]);
@@ -127,6 +207,10 @@ function AllJobsScreen(props) {
 						<Text>Edit a job</Text>
 					</>
 				</TouchableOpacity>
+				</View>
+				<JobSelectionScreen jobData={jobData} onRefresh={() => {
+					setShouldRefresh(true);
+				}}/>
 			</View>
 		);
 	}
@@ -142,6 +226,8 @@ function AllJobsScreen(props) {
 			<>
 				<JobCreateForm onNextStep={(jobObject) => {
 					console.log("got:", jobObject);
+					// props.ShowAlert("Title: " + jobObject.title + "\nDescription: " + jobObject.description + "\nWage: $" + jobObject.wage + "/hr");
+					handleAddJobData(jobObject);
 					navProps.navigation.navigate(JobCreateScreenSteps[2]);
 				}} {...props} />
 			</>
@@ -199,9 +285,9 @@ function AllJobsScreen(props) {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		alignItems: "flex-start",
+		alignItems: "center",
 		justifyContent: "center",
-		flexDirection: "row",
+		flexDirection: "column",
 		marginHorizontal: 10,
 	},
 	alignRight: {
