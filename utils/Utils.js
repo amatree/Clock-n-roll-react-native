@@ -36,6 +36,10 @@ function getIcon(name, type="I", size=24, style={}) {
   return r_icon;
 }
 
+function AreObjectsDifferent(obj1, obj2) {
+  return JSON.stringify(obj1) !== JSON.stringify(obj2);
+}
+
 export {
   IsFunctionEmpty,
   Capitalize,
@@ -44,4 +48,5 @@ export {
   TrimForNumber,
   AttachWagePerHour,
   ObjectHasEmptyValue,
+  AreObjectsDifferent,
 }

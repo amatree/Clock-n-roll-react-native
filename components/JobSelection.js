@@ -24,7 +24,7 @@ import Animated, {
 	cancelAnimation,
 } from "react-native-reanimated";
 import { RefreshControl, ScrollView } from "react-native-gesture-handler";
-import { getIcon } from "../utils/Utils";
+import { AreObjectsDifferent, AttachWagePerHour, getIcon } from "../utils/Utils";
 
 function JobSelectionScreen({
 	jobData = {},
@@ -54,7 +54,7 @@ function JobSelectionScreen({
 	// jobs fetch
 	const [allJobs, setAllJobs] = useState(jobData);
 	useEffect(() => {
-		setAllJobs(jobData);
+		if (AreObjectsDifferent(jobData, allJobs)) setAllJobs(jobData);
 	}, [jobData]);
 
 	function GenerateCallbackEvent({ message, jobID }) {
@@ -62,7 +62,7 @@ function JobSelectionScreen({
 		if (jobID < 0) {
 			result = { success: false, content: {} };
 		} else {
-			result = { success: true, content: allJobs[jobID] };
+			result = { success: true, content: allJobs[jobID], fullContent: {[jobID]: allJobs[jobID]} };
 		}
 		return { message, result };
 	}
@@ -109,10 +109,6 @@ function JobSelectionScreen({
 	useEffect(() => {
 		if (props.generateDummyJobs) GenerateJobArray();
 	}, []);
-
-	useEffect(() => {
-		// console.log(allJobs);
-	}, [allJobs]);
 
 	const [refreshing, setRefreshing] = useState(false);
 
@@ -203,6 +199,7 @@ function JobCard({
 	jobObject = {},
 	title = "No title given.",
 	shortDescription = "No description given.",
+	wage = "Free labor..",
 	onPress = () => {},
 	removerShown = true,
 	titleMultiline = false,
@@ -211,9 +208,11 @@ function JobCard({
 }) {
 	var jobTitle = title;
 	var jobDesc = shortDescription;
-	if (Object.values(jobObject).length === 2) {
-		if (jobTitle) jobTitle = jobObject.title;
+	var jobWage = wage;
+	if (Object.values(jobObject).length >= 2) {
+		if (jobObject.title) jobTitle = jobObject.title;
 		if (jobObject.description) jobDesc = jobObject.description;
+		if (jobObject.wage) jobWage = jobObject.wage;
 	}
 
 	return (
@@ -221,7 +220,7 @@ function JobCard({
 			onPress={() => {
 				onPress();
 			}}>
-			<View style={[styles.jobCard, props.style]}>
+			<View style={[styles.jobCard, props.style, ]}>
 				<View style={styles.jobCardHeader}>
 					<Text
 						style={styles.text}
@@ -240,6 +239,7 @@ function JobCard({
 					numberOfLines={descriptionMultiline ? undefined : 1}>
 					{jobDesc}
 				</Text>
+			<Text style={[styles.text, {alignSelf: "flex-end", color: "#85bb65"}]}>{AttachWagePerHour(jobWage)}</Text>
 			</View>
 		</TouchableOpacity>
 	);
@@ -281,6 +281,8 @@ const styles = StyleSheet.create({
 		},
 		elevation: 2,
 		height: 110,
+		minWidth: "80%",
+		// justifyContent: "space-between",
 	},
 	jobCardHeader: {
 		flexDirection: "row",

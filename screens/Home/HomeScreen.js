@@ -21,8 +21,17 @@ import {
 	RecaptchaVerifier,
 	PhoneAuthProvider,
 } from "firebase/auth";
+import {
+	getDatabase,
+	ref,
+	set,
+	remove,
+	child,
+	get,
+	update,
+	onValue,
+} from "firebase/database";
 import { usePromise } from "../../components/PromiseHandle";
-import { getDatabase, ref, set, update } from "firebase/database";
 
 import Animated, {
 	useSharedValue,
@@ -47,6 +56,7 @@ function HomeScreen({ states, setStates, ...props }) {
 	const auth = getAuth();
 	const user = auth.currentUser;
 	const db = getDatabase();
+	const dbRef = ref(db);
 
 	if (!user) {
 		console.error("no access to home page");
@@ -97,23 +107,47 @@ function HomeScreen({ states, setStates, ...props }) {
 		console.log(result);
 	}
 
+	const [jobData, setJobData] = useState({});
+
 	const [selectedJob, setSelectedJob] = useState({});
 	useEffect(() => {
 		if (stateNav === 1) {
-			// selecting job
-			setMainComponent(
-				<JobSelectionScreen
-					generateDummyJobs={true}
-					callback={(e) => {
-						setShowBigButton(true);
-						console.log(e.result.content);
-						setSelectedJob(e.result.content);
-					}}
-					{...props}
-				/>
-			);
-			setShowBigButton(false);
+			// fetch job data from server
+			var jobDataFetch = {};
+
+			get(child(dbRef, `users/${user.uid}/jobs`))
+				.then((snapshot) => {
+					if (snapshot.exists()) {
+						console.log(
+							"[" + new Date().toLocaleString() + "] retrieved job data from db"
+						);
+						jobDataFetch = snapshot.val();
+					}
+				})
+				.catch((error) => {
+					props.ShowAlert("Error: could not fetch data from server!");
+					console.error(error);
+				})
+				.finally(() => {
+					setJobData(jobDataFetch);
+
+					// selecting job
+					setMainComponent(
+						<JobSelectionScreen
+							jobData={jobDataFetch}
+							callback={(e) => {
+								setShowBigButton(true);
+								console.log("selected:\n", e.result.content, "\n");
+								setSelectedJob(e.result.content);
+							}}
+							{...props}
+						/>
+					);
+					setShowBigButton(false);
+				})
+
 		} else if (stateNav === 2) {
+			console.log(selectedJob);
 			// clocking in
 			setMainComponent(
 				<View style={{ flex: 1, alignItems: "center" }}> 
