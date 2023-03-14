@@ -1,6 +1,10 @@
 import {default as MCIcon} from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from "react-native-vector-icons/Ionicons";
 
+const Colors = {
+  accent: "#b472f2",
+}
+
 function IsFunctionEmpty(fn) {
   return fn.toString() === 0;
 }
@@ -49,4 +53,5 @@ export {
   AttachWagePerHour,
   ObjectHasEmptyValue,
   AreObjectsDifferent,
+  Colors,
 }

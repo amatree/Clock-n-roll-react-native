@@ -24,11 +24,18 @@ import Animated, {
 	cancelAnimation,
 } from "react-native-reanimated";
 import { RefreshControl, ScrollView } from "react-native-gesture-handler";
-import { AreObjectsDifferent, AttachWagePerHour, getIcon } from "../utils/Utils";
+import {
+	AreObjectsDifferent,
+	AttachWagePerHour,
+	Colors,
+	LengthOf,
+	getIcon,
+} from "../utils/Utils";
 
 function JobSelectionScreen({
 	jobData = {},
 	callback = (jobSelectionEvent) => {},
+	onJobDeletion = (jobData) => {},
 	onRefresh = () => {},
 	...props
 }) {
@@ -62,7 +69,11 @@ function JobSelectionScreen({
 		if (jobID < 0) {
 			result = { success: false, content: {} };
 		} else {
-			result = { success: true, content: allJobs[jobID], fullContent: {[jobID]: allJobs[jobID]} };
+			result = {
+				success: true,
+				content: allJobs[jobID],
+				fullContent: { [jobID]: allJobs[jobID] },
+			};
 		}
 		return { message, result };
 	}
@@ -120,9 +131,13 @@ function JobSelectionScreen({
 		}, 2000);
 	}, []);
 
+	const [currentSelection, setCurrentSelection] = useState("");
+	useEffect(() => {
+		console.log(currentSelection);
+	}, [currentSelection])
+
 	// child for popup modal
 	function JobCards({ ...props }) {
-		const JobCardHeight = 100;
 		return (
 			<ScrollView
 				refreshControl={
@@ -135,7 +150,12 @@ function JobSelectionScreen({
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}>
 				{refreshing ? (
-					<Text style={{ textAlign: "center", fontSize: 12, fontFamily: "Maitree" }}>
+					<Text
+						style={{
+							textAlign: "center",
+							fontSize: 12,
+							fontFamily: "Maitree",
+						}}>
 						Refreshing...
 					</Text>
 				) : Object.keys(allJobs).length > 0 ? (
@@ -145,10 +165,7 @@ function JobSelectionScreen({
 
 						return (
 							<JobCard
-								title={job.title ? job.title : "No title given."}
-								shortDescription={
-									job.description ? job.description : "No description given."
-								}
+								jobObject={{ id, ...job }}
 								onPress={() => {
 									callback(
 										GenerateCallbackEvent({
@@ -157,7 +174,13 @@ function JobSelectionScreen({
 										})
 									);
 								}}
-								key={idx}
+								onDeleteJob={() => {
+									onJobDeletion(id);
+								}}
+								isSelected={currentSelection === id}
+								setSelection={setCurrentSelection}
+								key={id}
+								{...props}
 							/>
 						);
 					})
@@ -190,60 +213,85 @@ function JobSelectionScreen({
 					}}
 				/>
 			</Animated.View>
-			<JobCards />
+			<JobCards {...props} />
 		</View>
 	);
 }
 
 function JobCard({
 	jobObject = {},
+	id = -1,
 	title = "No title given.",
 	shortDescription = "No description given.",
 	wage = "Free labor..",
 	onPress = () => {},
+	onDeleteJob = () => {},
 	removerShown = true,
 	titleMultiline = false,
 	descriptionMultiline = false,
+	isSelected = false,
+	setSelection = () => {},
 	...props
 }) {
-	var jobTitle = title;
-	var jobDesc = shortDescription;
-	var jobWage = wage;
-	if (Object.values(jobObject).length >= 2) {
-		if (jobObject.title) jobTitle = jobObject.title;
-		if (jobObject.description) jobDesc = jobObject.description;
-		if (jobObject.wage) jobWage = jobObject.wage;
+	const jobID = jobObject.id ? jobObject.id : id;
+	const jobTitle = jobObject.title ? jobObject.title : title;
+	const jobDesc = jobObject.description
+		? jobObject.description
+		: shortDescription;
+	const jobWage = jobObject.wage ? jobObject.wage : wage;
+
+	function handleDeleteJob() {
+		props.ShowAlert(
+			"Do you want to delete this job?\nThis action cannot be undone!",
+			{
+				type: "yn",
+				onYes: () => {
+					onDeleteJob(jobID);
+				},
+				onNo: () => {
+					console.log("user cancelled");
+				},
+			}
+		);
 	}
 
 	return (
 		<TouchableOpacity
 			onPress={() => {
+				setSelection(jobID);
 				onPress();
 			}}>
-			<View style={[styles.jobCard, props.style, ]}>
-				<View style={styles.jobCardHeader}>
+			<View style={[styles.jobCard, props.style, {borderColor: isSelected ? Colors.accent : undefined}]}>
+				<View>
+					<View style={styles.jobCardHeader}>
+						<Text
+							style={styles.text}
+							numberOfLines={titleMultiline ? undefined : 1}>
+							{jobTitle}
+						</Text>
+						<TouchableOpacity
+							onPress={() => {
+								handleDeleteJob();
+							}}>
+							{removerShown && getIcon("trash-outline")}
+						</TouchableOpacity>
+					</View>
 					<Text
-						style={styles.text}
-						numberOfLines={titleMultiline ? undefined : 1}>
-						{jobTitle}
+						style={styles.descriptionText}
+						numberOfLines={descriptionMultiline ? undefined : 1}>
+						{jobDesc}
 					</Text>
-					<TouchableOpacity
-						onPress={() => {
-							console.log("delete job");
-						}}>
-						{removerShown && getIcon("trash-outline")}
-					</TouchableOpacity>
 				</View>
 				<Text
-					style={styles.descriptionText}
-					numberOfLines={descriptionMultiline ? undefined : 1}>
-					{jobDesc}
+					style={[styles.text, { alignSelf: "flex-end", color: "#85bb65" }]}>
+					{AttachWagePerHour(jobWage)}
 				</Text>
-			<Text style={[styles.text, {alignSelf: "flex-end", color: "#85bb65"}]}>{AttachWagePerHour(jobWage)}</Text>
 			</View>
 		</TouchableOpacity>
 	);
 }
+
+const JobCardHeight = 150;
 
 const styles = StyleSheet.create({
 	container: {
@@ -280,9 +328,9 @@ const styles = StyleSheet.create({
 			height: 2,
 		},
 		elevation: 2,
-		height: 110,
+		height: JobCardHeight,
 		minWidth: "80%",
-		// justifyContent: "space-between",
+		justifyContent: "space-between",
 	},
 	jobCardHeader: {
 		flexDirection: "row",

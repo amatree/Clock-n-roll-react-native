@@ -58,14 +58,14 @@ export const JobCreateScreenSteps = [
 	"AddJobStep3",
 ];
 
-function AllJobsScreen({states, setStates, ...props}) {
+function AllJobsScreen({ states, setStates, ...props }) {
 	// console.log(props);
 
 	const auth = getAuth();
 	const user = auth.currentUser;
 	const db = getDatabase();
 	const dbRef = ref(db);
-	const jobsRef = ref(db, "users/" + user.uid + "/jobs")
+	const jobsRef = ref(db, "users/" + user.uid + "/jobs");
 
 	const [jobData, setJobData] = useState({});
 	const [hasUnsavedChange, setHasUnsavedChange] = useState(false);
@@ -88,7 +88,7 @@ function AllJobsScreen({states, setStates, ...props}) {
 		if (nextIdx === undefined) nextIdx = 0;
 		else nextIdx = Number(nextIdx.replace("Job", "")) + 1;
 		var newJobData = { ["Job" + nextIdx]: job };
-		setJobData({...jobData, ...newJobData});
+		setJobData({ ...jobData, ...newJobData });
 		setHasUnsavedChange(true);
 	}
 
@@ -153,7 +153,7 @@ function AllJobsScreen({states, setStates, ...props}) {
 	}
 
 	function beforeLoadingStackScreen(navProps, i) {
-		if (navProps === undefined) {	
+		if (navProps === undefined) {
 			resetHeader();
 			return;
 		}
@@ -178,39 +178,54 @@ function AllJobsScreen({states, setStates, ...props}) {
 		}, []);
 		return (
 			<View style={styles.container}>
-				<View style={{flexDirection: "row"}}>
-				<TouchableOpacity
-					onPress={() => {
-						props.navigation.navigate(JobCreateScreenSteps[1]);
-					}}
-					style={styles.addJobButton}>
-					<>
-						{getIcon("plus-box-outline", "M", 24, {
-							left: -10,
-							top: -1,
-							paddingHorizontal: 10,
-						})}
-						<Text>Add a job</Text>
-					</>
-				</TouchableOpacity>
-				<TouchableOpacity
-					onPress={() => {
-						console.log("edit");
-					}}
-					style={styles.addJobButton}>
-					<>
-						{getIcon("pencil-outline", "M", 24, {
-							left: -10,
-							top: -1,
-							paddingHorizontal: 10,
-						})}
-						<Text>Edit a job</Text>
-					</>
-				</TouchableOpacity>
+				<View style={{ flexDirection: "row" }}>
+					<TouchableOpacity
+						onPress={() => {
+							props.navigation.navigate(JobCreateScreenSteps[1]);
+						}}
+						style={styles.addJobButton}>
+						<>
+							{getIcon("plus-box-outline", "M", 24, {
+								left: -10,
+								top: -1,
+								paddingHorizontal: 10,
+							})}
+							<Text>Add a job</Text>
+						</>
+					</TouchableOpacity>
+					<TouchableOpacity
+						onPress={() => {
+							console.log("edit");
+						}}
+						style={styles.addJobButton}>
+						<>
+							{getIcon("pencil-outline", "M", 24, {
+								left: -10,
+								top: -1,
+								paddingHorizontal: 10,
+							})}
+							<Text>Edit a job</Text>
+						</>
+					</TouchableOpacity>
 				</View>
-				<JobSelectionScreen jobData={jobData} onRefresh={() => {
-					setShouldRefresh(true);
-				}}/>
+				<JobSelectionScreen
+					jobData={jobData}
+					onRefresh={() => {
+						setShouldRefresh(true);
+					}}
+					onJobDeletion={(jobID) => {
+						if (!Object.keys(jobData).includes(jobID)) {
+							console.log("could not find", jobID, "in the database");
+							return;
+						}
+						var jobsCopy = {...jobData};
+						delete jobsCopy[jobID];
+						setJobData(jobsCopy);
+						setHasUnsavedChange(true);
+						console.log("successfully deleted " + jobID);
+					}}
+					{...props}
+				/>
 			</View>
 		);
 	}
@@ -224,12 +239,15 @@ function AllJobsScreen({states, setStates, ...props}) {
 
 		return (
 			<>
-				<JobCreateForm onNextStep={(jobObject) => {
-					console.log("got:", jobObject);
-					// props.ShowAlert("Title: " + jobObject.title + "\nDescription: " + jobObject.description + "\nWage: $" + jobObject.wage + "/hr");
-					handleAddJobData(jobObject);
-					navProps.navigation.navigate(JobCreateScreenSteps[2]);
-				}} {...props} />
+				<JobCreateForm
+					onNextStep={(jobObject) => {
+						console.log("got:", jobObject);
+						// props.ShowAlert("Title: " + jobObject.title + "\nDescription: " + jobObject.description + "\nWage: $" + jobObject.wage + "/hr");
+						handleAddJobData(jobObject);
+						navProps.navigation.navigate(JobCreateScreenSteps[2]);
+					}}
+					{...props}
+				/>
 			</>
 		);
 	}
