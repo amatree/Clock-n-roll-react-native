@@ -17,6 +17,14 @@ function ObjectHasEmptyValue(obj) {
 	);
 }
 
+function GetKeyFromObject(obj, keyIdx = 0) {
+	return Object.keys(obj)[keyIdx];
+}
+
+function GetValueFromObject(obj, valueIdx = 0) {
+	return Object.values(obj)[keyIdx];
+}
+
 function TrimForNumber(str) {
 	return str.replace(/[^\d.-]/g, "");
 }
@@ -70,5 +78,7 @@ export {
 	AreObjectsDifferent,
 	Round,
   ToCurrency,
+	GetKeyFromObject,
+	GetValueFromObject,
 	Colors,
 };

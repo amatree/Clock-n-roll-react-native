@@ -66,8 +66,8 @@ export default function Clock({ child, childProps, ...props }) {
 					stopWatch.stopTimer();
 					childProps.onFinish({
 						timeElapsed: stopWatch.formatAsTimeObject(),
-						startTime: clockedAt,
-						endTime: new Date(),
+						startTime: clockedAt.toString(),
+						endTime: (new Date()).toString(),
             earning: TrimForNumber(ToCurrency(stopWatch.formatAs("h") * props.job.wage)),
 					});
 				},

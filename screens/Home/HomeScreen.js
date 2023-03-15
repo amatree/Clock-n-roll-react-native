@@ -49,6 +49,7 @@ import Animated, {
 import BigButton from "../../components/BigButton";
 import { JobCard, JobSelectionScreen } from "../../components/JobSelection";
 import Clock from "../../components/Clock";
+import { GetKeyFromObject } from "../../utils";
 
 var d_width = Dimensions.get("window").width; //full width
 var d_height = Dimensions.get("window").height; //full height
@@ -103,7 +104,13 @@ function HomeScreen({ states, setStates, ...props }) {
 	const [mainComponent, setMainComponent] = useState(null);
 	function handleBigButtonOnFinish(e) {
 		setStateNav(stateNav + 1);
-		console.log(e||undefined);
+		
+		if (e) {
+			if (!jobData[selectedJobID]["history"]) jobData[selectedJobID]["history"] = [];
+			jobData[selectedJobID]["history"].push(e);
+			console.log(jobData[selectedJobID].history);
+			setHasUnsavedChange(true);
+		}
 	}
 
 	function handleJobSelection(result) {
@@ -111,8 +118,46 @@ function HomeScreen({ states, setStates, ...props }) {
 	}
 
 	const [jobData, setJobData] = useState({});
+	const [hasUnsavedChange, setHasUnsavedChange] = useState(false);
+
+	async function handleWriteData() {
+		const [r, err] = await usePromise(
+			set(ref(db, "users/" + user.uid + "/jobs"), jobData)
+		);
+		if (err) {
+			alert(err.message);
+		} else {
+			console.log("[" + new Date().toLocaleString() + "] job data synced!");
+		}
+	}
+
+	function handleAddJobData(job) {
+		var allJobs = Object.keys(jobData);
+		var nextIdx = allJobs[allJobs.length - 1];
+		if (nextIdx === undefined) nextIdx = 0;
+		else nextIdx = Number(nextIdx.replace("Job", "")) + 1;
+		var newJobData = { ["Job" + nextIdx]: job };
+		setJobData({ ...jobData, ...newJobData });
+		setHasUnsavedChange(true);
+	}
+
+	useEffect(() => {
+		let timer = null;
+		if (hasUnsavedChange) {
+			setHasUnsavedChange(false);
+			handleWriteData();
+		}
+
+		return () => {
+			if (timer) {
+				clearTimeout(timer);
+				setHasUnsavedChange(false);
+			}
+		};
+	}, [hasUnsavedChange]);
 
 	const [selectedJob, setSelectedJob] = useState({});
+	const [selectedJobID, setSelectedJobID] = useState(null);
 	useEffect(() => {
 		if (stateNav === 1) {
 			// selecting job
@@ -125,7 +170,9 @@ function HomeScreen({ states, setStates, ...props }) {
 						console.log("selected:\n", e.result.content);
 						setSelectedJob(e.result.content);
 						setJobTitle(e.result.content.title);
+						setSelectedJobID(GetKeyFromObject(e.result.fullContent));
 					}}
+					onRefresh={() => onFirstSync()}
 					{...props}
 				/>
 			);
