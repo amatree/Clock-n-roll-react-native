@@ -27,7 +27,7 @@ import {
 
 import LoadingScreen from "../../../components/LoadingScreen";
 import { PopupModal } from "../../../components/PopupModal";
-import { getIcon, LengthOf } from "../../../utils/Utils";
+import { getIcon, LengthOf } from "../../../utils";
 
 function TodoScreen({ states, setStates, ...props }) {
 	const auth = getAuth();

@@ -2,7 +2,7 @@ import { StyleSheet, Text, TextInput, View, TouchableOpacity, Image, TouchableWi
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import {default as MCIcon} from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from "react-native-vector-icons/Ionicons";
-import { Capitalize } from '../utils/Utils';
+import { Capitalize } from '../utils';
 
 import Animated, {
 	useSharedValue,

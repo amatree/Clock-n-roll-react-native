@@ -45,7 +45,7 @@ import Animated, {
 
 import BigButton from "../../components/BigButton";
 import { JobCard, JobSelectionScreen } from "../../components/JobSelection";
-import { getIcon } from "../../utils/Utils";
+import { getIcon } from "../../utils";
 import { createStackNavigator } from "@react-navigation/stack";
 import { useFocusEffect, useNavigationState } from "@react-navigation/native";
 import { JobCreateForm } from "../../components/JobCreateForm";

@@ -48,6 +48,7 @@ import Animated, {
 
 import BigButton from "../../components/BigButton";
 import { JobCard, JobSelectionScreen } from "../../components/JobSelection";
+import Clock from "../../components/Clock";
 
 var d_width = Dimensions.get("window").width; //full width
 var d_height = Dimensions.get("window").height; //full height
@@ -73,34 +74,36 @@ function HomeScreen({ states, setStates, ...props }) {
 
 	// button configs
 	const [stateNav, setStateNav] = useState(0);
-	const firstBtn = {
+	const btnJobSelectProps = {
 		text: "Select a job to clock in..",
 		spinCircleColor: "black",
 		spinCircleColor: "#D0D0D0",
 		style: { backgroundColor: "#D0D0D0" },
 		onFinish: () => handleBigButtonOnFinish(),
 	};
-	const secondBtn = {
+	const btnClockInProps = {
 		text: "Press to clock in~",
 		// spinCircleColor: "#707070",
 		spinCircleColor: "#D0D0D0",
 		style: { backgroundColor: "#7CFF81" },
 		onFinish: () => handleBigButtonOnFinish(),
 	};
-	const thirdBtn = {
+	const btnClockOutProps = {
 		text: "Clock out now~!",
 		spinCircleColor: "#D0D0D0",
 		style: { backgroundColor: "#FF3939", color: "#FFFFFF" },
-		onFinish: () => handleBigButtonOnFinish(),
+		onFinish: (e) => handleBigButtonOnFinish(e),
 	};
-	const bigbtn_1 = <BigButton {...firstBtn} />;
-	const bigbtn_2 = <BigButton {...secondBtn} />;
-	const bigbtn_3 = <BigButton {...thirdBtn} />;
+	const [jobTitle, setJobTitle] = useState("");
+	const btnJobSelect = <BigButton {...btnJobSelectProps} />;
+	const btnClockIn = <BigButton {...btnClockInProps} title={jobTitle} />;
+	const btnClockOut = <BigButton {...btnClockOutProps} />;
 	const [showBigButton, setShowBigButton] = useState(true);
 
 	const [mainComponent, setMainComponent] = useState(null);
-	function handleBigButtonOnFinish() {
+	function handleBigButtonOnFinish(e) {
 		setStateNav(stateNav + 1);
+		console.log(e||undefined);
 	}
 
 	function handleJobSelection(result) {
@@ -112,54 +115,39 @@ function HomeScreen({ states, setStates, ...props }) {
 	const [selectedJob, setSelectedJob] = useState({});
 	useEffect(() => {
 		if (stateNav === 1) {
-			// fetch job data from server
-			var jobDataFetch = {};
-
-			get(child(dbRef, `users/${user.uid}/jobs`))
-				.then((snapshot) => {
-					if (snapshot.exists()) {
-						console.log(
-							"[" + new Date().toLocaleString() + "] retrieved job data from db"
-						);
-						jobDataFetch = snapshot.val();
-					}
-				})
-				.catch((error) => {
-					props.ShowAlert("Error: could not fetch data from server!");
-					console.error(error);
-				})
-				.finally(() => {
-					setJobData(jobDataFetch);
-
-					// selecting job
-					setMainComponent(
-						<JobSelectionScreen
-							jobData={jobDataFetch}
-							callback={(e) => {
-								setShowBigButton(true);
-								console.log("selected:\n", e.result.content, "\n");
-								setSelectedJob(e.result.content);
-							}}
-							{...props}
-						/>
-					);
-					setShowBigButton(false);
-				})
-
-		} else if (stateNav === 2) {
-			console.log(selectedJob);
-			// clocking in
+			// selecting job
 			setMainComponent(
-				<View style={{ flex: 1, alignItems: "center" }}> 
-				<Text onPress={() => setShowBigButton(true)}>
-					Next
-				</Text>
-				<JobCard style={{marginBottom: 30}} jobObject={selectedJob} removerShown={false} descriptionMultiline={true} />
+				<JobSelectionScreen
+					jobData={jobData}
+					removerShown={false}
+					callback={(e) => {
+						setShowBigButton(true);
+						console.log("selected:\n", e.result.content);
+						setSelectedJob(e.result.content);
+						setJobTitle(e.result.content.title);
+					}}
+					{...props}
+				/>
+			);
+			setShowBigButton(false);
+		} else if (stateNav === 2) {
+			setShowBigButton(true);
+			// clock in screen
+			setMainComponent(
+				<View
+					style={{
+						flex: 1,
+						alignItems: "center",
+						paddingVertical: "5%",
+						justifyContent: "space-evenly",
+					}}>
+					<Clock child={BigButton} childProps={btnClockOutProps} job={selectedJob}>
+					</Clock>
 				</View>
 			);
 			setShowBigButton(false);
 		} else if (stateNav === 3) {
-			// clocking out
+			// clock out screen
 			setMainComponent(
 				<Text onPress={() => setShowBigButton(true)}>Next</Text>
 			);
@@ -186,14 +174,21 @@ function HomeScreen({ states, setStates, ...props }) {
 	}
 
 	async function onFirstSync() {
-		const [r, err] = await usePromise(
-			update(ref(db, "users/" + user.uid), {
-				username: user.displayName,
-				email: email,
-				profile_picture: user.photoURL,
-				last_login: new Date().toLocaleString(),
+		// fetch job data from server
+		get(child(dbRef, `users/${user.uid}/jobs`))
+			.then((snapshot) => {
+				if (snapshot.exists()) {
+					console.log(
+						"[" + new Date().toLocaleString() + "] retrieved job data from db"
+					);
+					setJobData(snapshot.val());
+				}
 			})
-		);
+			.catch((error) => {
+				props.ShowAlert("Error: could not fetch data from server!");
+				console.error(error);
+			})
+			.finally(() => {});
 	}
 
 	return (
@@ -207,10 +202,10 @@ function HomeScreen({ states, setStates, ...props }) {
 			}}>
 			{showBigButton
 				? stateNav === 0
-					? bigbtn_1
+					? btnJobSelect
 					: stateNav === 1
-					? bigbtn_2
-					: bigbtn_3
+					? btnClockIn
+					: btnClockOut
 				: mainComponent}
 			{/* <BottomTabs /> */}
 		</View>

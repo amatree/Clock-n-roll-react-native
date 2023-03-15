@@ -24,7 +24,7 @@ import Animated, {
 	cancelAnimation,
 } from "react-native-reanimated";
 import { ScrollView } from "react-native-gesture-handler";
-import { AttachWagePerHour, ObjectHasEmptyValue, TrimForNumber, getIcon } from "../utils/Utils";
+import { AttachWagePerHour, ObjectHasEmptyValue, TrimForNumber, getIcon } from "../utils";
 
 function JobCreateForm({ onNextStep = () => {}, ...props }) {
 	const [jobObject, setJobObject] = useState({

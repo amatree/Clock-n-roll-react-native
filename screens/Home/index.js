@@ -3,12 +3,12 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { default as MCIcon } from "react-native-vector-icons/MaterialCommunityIcons";
 
-import { ProfileScreen } from "./ProfileScreen";
-import { HistoryScreen } from "./HistoryScreen";
+import { ProfileScreen } from "./ProfileScreens";
+import { HistoryScreen } from "./HistoryScreens";
+import { ExportScreen } from "./ExportScreens";
+import { SettingsScreen } from "./SettingScreens";
+import { TodoScreen } from "./TodoScreens";
 import { HomeScreen } from "./HomeScreen";
-import { ExportScreen } from "./ExportScreen";
-import { SettingsScreen } from "./SettingScreen";
-import { TodoScreen } from "./TodoScreens/TodoScreen";
 
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";

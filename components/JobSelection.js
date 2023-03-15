@@ -30,7 +30,7 @@ import {
 	Colors,
 	LengthOf,
 	getIcon,
-} from "../utils/Utils";
+} from "../utils";
 
 function JobSelectionScreen({
 	jobData = {},

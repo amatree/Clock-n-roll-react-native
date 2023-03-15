@@ -11,7 +11,7 @@ import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
-import { HomeScreenApp } from "./screens/Home/HomeApp";
+import { HomeScreenApp } from "./screens/Home/";
 import { useEffect, useState, useRef, lazy, Suspense } from "react";
 
 import { SigninScreen } from "./screens/SigninScreen";

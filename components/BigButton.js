@@ -30,6 +30,7 @@ var d_height = Dimensions.get("window").height; //full height
 
 export default function BigButton({
 	text = "click me",
+	title = "",
 	spinCircleColor = "black",
 	onFinish = () => {},
 	...props
@@ -41,7 +42,7 @@ export default function BigButton({
 		return {
 			transform: [
 				{
-          // interpolate(btnCircleRun.value, [0, 270], [0, 270]) + "deg"
+					// interpolate(btnCircleRun.value, [0, 270], [0, 270]) + "deg"
 					rotate: btnCircleRun.value + "deg",
 				},
 			],
@@ -127,7 +128,19 @@ export default function BigButton({
 			fontSize: 24,
 			textAlign: "center",
 			paddingHorizontal: 12,
-      color: props.style.color || "#000000",
+			color: props.style.color || "#000000",
+		},
+		titleText: {
+			position: "absolute",
+			fontFamily: "MaitreeBold",
+			fontSize: 24,
+			textAlign: "center",
+			paddingHorizontal: 12,
+			color: props.style.color || "#000000",
+			maxWidth: "90%",
+			zIndex: 1,
+			top: -0.157 * d_height,
+			textDecorationLine: "underline",
 		},
 	});
 
@@ -140,14 +153,17 @@ export default function BigButton({
 			onPress={() => {
 				handleOnPress();
 			}}>
-			<Animated.View style={btnPressStyle}>
-				<View style={styles.bigbtnShadow}>
-					<Animated.View style={btnSpinStyle}>
-						<View style={[styles.bigbtn, props.style]} />
-					</Animated.View>
-					<Text style={[styles.text]}>{text}</Text>
-				</View>
-			</Animated.View>
+			<View style={{display: "flex", justifyContent: "flex-start", alignItems: "center"}}>
+				{title != "" && <Text style={[styles.titleText,]}>{title}</Text>}
+				<Animated.View style={btnPressStyle}>
+					<View style={styles.bigbtnShadow}>
+						<Animated.View style={btnSpinStyle}>
+							<View style={[styles.bigbtn, props.style]} />
+						</Animated.View>
+						<Text style={[styles.text]}>{text}</Text>
+					</View>
+				</Animated.View>
+			</View>
 		</TouchableWithoutFeedback>
 	);
 }
