@@ -8,7 +8,7 @@ import { HistoryScreen } from "./HistoryScreen";
 import { HomeScreen } from "./HomeScreen";
 import { ExportScreen } from "./ExportScreen";
 import { SettingsScreen } from "./SettingScreen";
-import { TodoScreen } from "./TodoScreen";
+import { TodoScreen } from "./TodoScreens/TodoScreen";
 
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";

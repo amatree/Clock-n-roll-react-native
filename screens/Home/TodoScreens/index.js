@@ -10,9 +10,9 @@ import {
 	ScrollView,
 	Platform,
 } from "react-native";
-import Task from "../../components/Task";
+import Task from "../../../components/Task";
 
-import { usePromise } from "../../components/PromiseHandle";
+import { usePromise } from "../../../components/PromiseHandle";
 import { getAuth } from "firebase/auth";
 import {
 	getDatabase,
@@ -25,9 +25,9 @@ import {
 	onValue,
 } from "firebase/database";
 
-import LoadingScreen from "../../components/LoadingScreen";
-import { PopupModal } from "../../components/PopupModal";
-import { getIcon, LengthOf } from "../../utils/Utils";
+import LoadingScreen from "../../../components/LoadingScreen";
+import { PopupModal } from "../../../components/PopupModal";
+import { getIcon, LengthOf } from "../../../utils/Utils";
 
 function TodoScreen({ states, setStates, ...props }) {
 	const auth = getAuth();
