@@ -57,7 +57,7 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 				{/* Job title input */}
 				<View style={styles.inputContainer}>
 					<TextInput
-						style={[styles.input, {borderBottomWidth: inputFieldFocus.title && 1}]}
+						style={[styles.input, {borderBottomWidth: inputFieldFocus.title ? 1 : 0}]}
 						placeholder="Software Engineer"
 						returnKeyType="next"
 						onFocus={() => {
@@ -81,7 +81,7 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 				{/* Wage input */}
 				<View style={styles.inputContainer}>
 					<TextInput
-						style={[styles.input, {borderBottomWidth: inputFieldFocus.wage && 1} ]}
+						style={[styles.input, {borderBottomWidth: inputFieldFocus.wage ? 1 : 0} ]}
 						placeholder="$16/hr"
 						maxLength={7}
 						keyboardType="numeric"
@@ -91,7 +91,7 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 						defaultValue={jobWageTextInput}
 						onBlur={(e) => {
 							setInputFieldFocus({...inputFieldFocus, wage: false});
-							const text = e.nativeEvent.text.trim();
+							const text = jobObject.wage.trim();
 							if (
 								text &&
 								!(
@@ -105,7 +105,7 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 						}}
 						onFocus={(e) => {
 							setInputFieldFocus({...inputFieldFocus, wage: true});
-							const text = e.nativeEvent.text.trim();
+							const text = jobObject.wage.trim();
 							setJobWageTextInput(undefined);
 							if (
 								text &&
@@ -143,13 +143,12 @@ function JobCreateForm({ onNextStep = () => {}, ...props }) {
 								minHeight: 150,
 								maxHeight: 300,
 								overflow: "hidden",
-								borderBottomWidth: inputFieldFocus.description && 1,
+								borderBottomWidth: inputFieldFocus.description ? 1 : 0,
 							},
 						]}
 						returnKeyType="next"
 						placeholder="Develop systems and software that allow users to perform specific tasks on computers or other devices."
 						multiline={true}
-						autoComplete={false}
 						onSubmitEditing={(e) =>
 							setJobObject({ ...jobObject, description: e.nativeEvent.text })
 						}

@@ -24,7 +24,7 @@ import Animated, {
 	cancelAnimation,
 } from "react-native-reanimated";
 import Stopwatch from "./Stopwatch";
-import { ToCurrency, TrimForNumber } from "../utils";
+import { Round, ToCurrency, TrimForNumber } from "../utils";
 
 export default function Clock({ child, childProps, ...props }) {
 	const [clockedAt, _] = useState(new Date());
@@ -47,7 +47,7 @@ export default function Clock({ child, childProps, ...props }) {
 		return (
 			<View style={[styles.box, { paddingBottom: 24 }]}>
 				<Text style={[styles.text, { color: "#85bb65" }]}>
-					{ToCurrency(stopWatch.formatAs("h") * props.job.wage)}
+					${Round(ToCurrency(stopWatch.formatAs("h") * props.job.wage), 2)}
 				</Text>
 			</View>
 		);

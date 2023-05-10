@@ -218,7 +218,7 @@ function AllJobsScreen({ states, setStates, ...props }) {
 							console.log("could not find", jobID, "in the database");
 							return;
 						}
-						var jobsCopy = {...jobData};
+						var jobsCopy = { ...jobData };
 						delete jobsCopy[jobID];
 						setJobData(jobsCopy);
 						setHasUnsavedChange(true);
