@@ -59,4 +59,4 @@ Here is a list of features that have been implemented:
 
 ## License
 
-MIT License ![here](./LICENSE).
+MIT License [here](./LICENSE).
