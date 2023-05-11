@@ -1,3 +1,6 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+
 # Clock'n'roll
 
 Clock'n'roll is a mobile app that helps you keep track of your hours by clocking in & out of a job that you create, simulating the 'semi-real' experience of the real clock-in clock-out device in the workplace.
@@ -52,3 +55,8 @@ Here is a list of features that have been implemented:
 #### Details screen
 
 <img alt="Details Screen" src="./assets/screenshots/cnc-details.png" width="400">
+
+
+## License
+
+MIT License ![here](./LICENSE).
