@@ -3,6 +3,8 @@
 
 # Clock'n'roll
 
+Last Update: *__May 10th, 2023__* | Status: *__<ins>not finished</ins>!__*
+
 Clock'n'roll is a mobile app that helps you keep track of your hours by clocking in & out of a job that you create, simulating the 'semi-real' experience of the real clock-in clock-out device in the workplace.
 
 ## Progress
